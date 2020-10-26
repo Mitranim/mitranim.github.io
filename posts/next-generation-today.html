@@ -1,0 +1,1136 @@
+
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=2, initial-scale=1, user-scalable=yes" />
+  <link rel="icon" href="data:;base64,=" />
+  <link rel="stylesheet" type="text/css" href="/styles/main.css?3508717352" />
+
+  <title>Next Generation Today</title>
+
+  <link rel="alternate" type="application/atom+xml" title="Mitranim's Posts (Atom)" href="/feed.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Mitranim's Posts (RSS)" href="/feed_rss.xml" />
+
+  <meta name="author" content="Nelo Mitranim" />
+  <meta property="og:title" content="Next Generation Today" />
+  <meta name="description" content="EcmaScript 2015/2016 workflow with current web frameworks" />
+  
+  
+
+  
+</head>
+
+<body class="flex col-start-stretch relative" style="min-height: 100vh">
+  
+  <a href="#main-content" class="skip-to-content" onclick="event.preventDefault(); if (document.getElementById('main-content')) {document.getElementById('main-content').scrollIntoView()}">Skip to content</a>
+
+<div id="top" class="limit-width --unpadded flex row-start-stretch margin-b-2 gaps-h-1">
+  <nav class="flex row-start-stretch">
+    <a href="/"       class="navlink --busy">home</a>
+    <a href="/works"  class="navlink --busy">works</a>
+    <a href="/posts"  class="navlink --busy">posts</a>
+    <a href="/demos"  class="navlink --busy">demos</a>
+  </nav>
+
+  <span class="flex-1"></span>
+
+  <span class="fg-blue flex row-center-center padding-1 sm-hide">
+    Updated: Oct 26 2020
+  </span>
+</div>
+
+<div class="limit-width flex col-start-stretch flex-1">
+
+<div role="main" id="main-content" class="fancy-typography flex-1 flex col-start-stretch gaps-v-2">
+  <article role="article" class="fancy-typography">
+    
+    <h1><span class="heading-prefix" aria-hidden="true"></span>Next Generation Today</h1>
+    <p role="doc-subtitle" class="font-large font-italic">EcmaScript 2015/2016 workflow with current web frameworks</p>
+    <p class="fg-gray-close font-small">published May 18 2015</p>
+    <p class="theme-red padding-1">
+    <b>Update (late 2015)</b>. I've come to consider the tech covered in this post to be garbage. What's actually good? I'll try to cover that in due time.
+</p>
+
+<p>Next generation web frameworks are around the corner.
+<a href="https://angular.io" target="_blank" rel="noopener noreferrer">Angular2<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> and <a href="https://aurelia.io" target="_blank" rel="noopener noreferrer">Aurelia<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> go beta in a few
+months. They codify custom elements as the dominant design pattern, and put
+spotlight on some future and exotic JavaScript features: ES6 modules, decorated
+classes, TypeScript annotations, and other.</p>
+
+<p>This post will guide you through steps to using these features today, in
+production, with a tried and tested current generation framework. I&rsquo;ll use
+Angular 1.x as an example. By the end of the guide, your production-ready
+Angular code may look like this:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">Component</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;ng-decorate&#39;</span>;
+
+<span style="color:#66d9ef">@Component</span>({
+    <span style="color:#a6e22e">selector</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;app-tabset&#39;</span>
+})
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AppTabset</span> {
+    <span style="color:#66d9ef">constructor</span>() {
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">activeTab</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">tabs</span>[<span style="color:#ae81ff">0</span>];
+    }
+}
+</pre>
+<p>This guide is <em>massive</em>. I couldn&rsquo;t fit everything I wanted in here. You&rsquo;ll
+probably want to read it in chunks, taking breaks.</p>
+<h2 id="table-of-contents"><span class="heading-prefix" aria-hidden="true"></span>Table of Contents<a href="#table-of-contents" class="heading-anchor" aria-hidden="true"></a></h2>
+<ul>
+<li><a href="#setup"><span class="hash-prefix noprint" aria-hidden="true">#</span>Setup</a></li>
+<li><a href="#modules"><span class="hash-prefix noprint" aria-hidden="true">#</span>Modules</a></li>
+<li><a href="#components"><span class="hash-prefix noprint" aria-hidden="true">#</span>Components</a></li>
+<li><a href="#dealing-with-angular-di"><span class="hash-prefix noprint" aria-hidden="true">#</span>Angular DI</a></li>
+<li><a href="#services"><span class="hash-prefix noprint" aria-hidden="true">#</span>Services</a></li>
+<li><a href="#demo"><span class="hash-prefix noprint" aria-hidden="true">#</span>Demo</a></li>
+<li><a href="#production-builds"><span class="hash-prefix noprint" aria-hidden="true">#</span>Production Builds</a></li>
+</ul>
+<h2 id="setup"><span class="heading-prefix" aria-hidden="true"></span>Setup<a href="#setup" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>You can start from scratch or grab the finished demo at Github:
+<a href="https://github.com/mitranim/ng-next-gen" target="_blank" rel="noopener noreferrer">https://github.com/mitranim/ng-next-gen<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>.
+<strong>Note</strong>: the demo has <em>significantly</em> diverged from the guide by the time you&rsquo;re reading this.</p>
+
+<p>You can also check your progress against the
+<a href="https://mitranim.com/ng-next-gen/" target="_blank" rel="noopener noreferrer">live demo<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>.</p>
+<h3 id="prerequisites-for-everything"><span class="heading-prefix" aria-hidden="true"></span>Prerequisites For: Everything<a href="#prerequisites-for-everything" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>We&rsquo;ll start from blank. You&rsquo;ll need several command line utilities for package
+management and builds. The guide assumes you have <a href="https://nodejs.org" target="_blank" rel="noopener noreferrer">Node.js<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+and <a href="https://git-scm.com" target="_blank" rel="noopener noreferrer">git<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> installed. Install other tools with <code>npm</code>:</p>
+<pre style="color:#f8f8f2;background-color:#272822">npm install -g jspm gulp tsd
+
+<span style="color:#75715e"># If you get an EACCESS error, fix permissions or use admin privileges:</span>
+sudo npm install -g jspm gulp tsd
+</pre>
+<p>Create an empty directory and navigate there. Create the following structure:</p>
+<pre style="color:#f8f8f2;background-color:#272822">./═╦═ dist
+   ╚═ src
+      ╠═ app
+      ╚═ html
+</pre>
+<p>For simplicity, our sample app won&rsquo;t have style or image compilation, but if it
+did, those files would go into <code>src</code> under separate folders.</p>
+
+<p>Run <code>npm init</code> to create a <code>package.json</code> file. We&rsquo;ll need it later.</p>
+<h3 id="prerequisites-for-es6-7-code"><span class="heading-prefix" aria-hidden="true"></span>Prerequisites For: ES6/7 Code<a href="#prerequisites-for-es6-7-code" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>We&rsquo;ll be writing code from the future of JavaScript. This requires a
+<em>transpiler</em> that will convert it into EcmaScript 5 code compatible with current
+browsers. At the moment of writing, there are three big transpilers that support
+almost all of ES6 and some of ES7: <a href="https://babeljs.io" target="_blank" rel="noopener noreferrer">Babel<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>,
+<a href="https://github.com/Microsoft/TypeScript" target="_blank" rel="noopener noreferrer">TypeScript<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>, and
+<a href="https://github.com/google/traceur-compiler" target="_blank" rel="noopener noreferrer">Traceur<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>. They&rsquo;re largely
+interchangeable; this guide will use TypeScript, but you can pick Babel with
+equal results.</p>
+
+<p>Install the transpiler:</p>
+<pre style="color:#f8f8f2;background-color:#272822">npm i --save-dev Microsoft/TypeScript gulp-typescript
+</pre>
+<p>We need <code>typescript</code> from the repository for its support for the SystemJS module
+format. Once version 1.5.0 is released on <code>npm</code>, you can install it from there.</p>
+
+<p>All three transpilers support TypeScript type annotations, so even if you&rsquo;re
+using e.g. Babel, you can copy and paste the code from this page, and it will
+work (Babel will silently remove type annotations). In your gulp pipeline, you&rsquo;ll
+need to pass the following options to the babel transpiler:</p>
+<pre style="color:#f8f8f2;background-color:#272822">{<span style="color:#a6e22e">stage</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span>, <span style="color:#a6e22e">modules</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;system&#39;</span>}
+</pre><h3 id="prerequisites-for-es6-modules"><span class="heading-prefix" aria-hidden="true"></span>Prerequisites For: ES6 Modules<a href="#prerequisites-for-es6-modules" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>By far the biggest ES6 feature is the new, official, module system. It finally
+puts an end to the dark age of globals, AMD/CommonJS wars, and the Angular1 DI
+monstrosity. This is what the syntax looks like:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">_</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;lodash&#39;</span>;                 <span style="color:#75715e">// default import
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">Attribute</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;ng-decorate&#39;</span>;  <span style="color:#75715e">// named import
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyViewModel</span> {<span style="color:#75715e">/* ... */</span>};   <span style="color:#75715e">// named export
+</span></pre>
+<p>To use ES6 modules, you need two pieces:</p>
+
+<ol>
+<li><p>A module loader running in the browser that implements the semantics of ES6
+modules.</p></li>
+
+<li><p>A transpiler that converts your ES6 import/export statements into calls to
+that loader&rsquo;s API.</p></li>
+</ol>
+
+<p>That module loader is <a href="https://github.com/systemjs/systemjs" target="_blank" rel="noopener noreferrer">SystemJS<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>. It
+implements the complete semantics of ES6 modules, including circular references.
+The transpiler converts your import/export statements into calls to the SystemJS
+API. You also get lazy asynchronous loading, which is part of the module spec,
+for free. SystemJS also consumes the AMD and CommonJS formats, so you can import
+any existing libraries.</p>
+
+<p>In addition, we&rsquo;ll use <a href="https://jspm.io" target="_blank" rel="noopener noreferrer"><code>jspm</code><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>. It&rsquo;s the real package manager
+for the web that replaces <code>bower</code>. It will automatically install SystemJS for
+us.</p>
+
+<p>Run <code>jspm init</code> to create the configuration. When asked about baseUrl (public
+server path), answer <code>dist</code>. When asked about the <code>config.js</code> file, answer
+<code>system.config.js</code> instead of <code>dist/config.js</code>. Press enter for all other
+questions. Don&rsquo;t worry about it installing <code>traceur</code> — we&rsquo;ll pretranspile our
+files, so it will never be invoked.</p>
+
+<p>Open <code>system.config.js</code>, find <code>&quot;paths&quot;</code>, and change the import path for
+application files:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#75715e">// from:
+</span><span style="color:#75715e"></span><span style="color:#e6db74">&#34;*&#34;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;*.js&#34;</span>
+
+<span style="color:#75715e">// to:
+</span><span style="color:#75715e"></span><span style="color:#e6db74">&#34;*&#34;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;app/*.js&#34;</span>
+</pre>
+<p>Install our runtime dependencies:</p>
+<pre style="color:#f8f8f2;background-color:#272822">jspm install angular npm:ng-decorate npm:foliant npm:stylific
+</pre>
+<p><strong>Note</strong>: the finished demo now uses Webpack instead of SystemJS and jspm.</p>
+<h3 id="prerequisites-for-typescript"><span class="heading-prefix" aria-hidden="true"></span>Prerequisites For: TypeScript<a href="#prerequisites-for-typescript" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>If you chose to use Babel, skip this. If you&rsquo;re using TypeScript, you&rsquo;ll want
+some setup.</p>
+
+<p>First, create an <code>src/app/tsconfig.json</code> with the following:</p>
+<pre style="color:#f8f8f2;background-color:#272822">{
+    <span style="color:#f92672">&#34;version&#34;</span>: <span style="color:#e6db74">&#34;1.5.0&#34;</span>,
+    <span style="color:#f92672">&#34;compilerOptions&#34;</span>: {
+        <span style="color:#f92672">&#34;target&#34;</span>: <span style="color:#e6db74">&#34;es5&#34;</span>,
+        <span style="color:#f92672">&#34;module&#34;</span>: <span style="color:#e6db74">&#34;commonjs&#34;</span>,
+        <span style="color:#f92672">&#34;noImplicitAny&#34;</span>: <span style="color:#66d9ef">false</span>,
+        <span style="color:#f92672">&#34;experimentalDecorators&#34;</span>: <span style="color:#66d9ef">true</span>
+    }
+}
+</pre>
+<p><code>tsconfig.json</code> is a new feature in TypeScript 1.5. It hints your code editor
+and compiler at the root of your TypeScript application.</p>
+
+<p>Run <code>tsd init</code> to create a <code>tsd.json</code> file for our DefinitelyTyped definitions.
+Open it and change <code>typings</code> to <code>src/app/typings</code>. The definitions need to be
+inside our <code>src/app</code> for the editor and build pipeline to pick them up. Remove
+the automatically created <code>./typings</code> folder.</p>
+
+<p>Install the definitions (this command requires <code>tsd</code> 0.6+):</p>
+<pre style="color:#f8f8f2;background-color:#272822">tsd install angular -r -s
+</pre>
+<p>Create an <code>src/app/lib.d.ts</code> with the following:</p>
+<details class="details fancy-typography"><summary>src/app/lib.d.ts</summary><pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">declare</span> <span style="color:#a6e22e">module</span> <span style="color:#e6db74">&#39;ng-decorate&#39;</span> {
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">Attribute</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">Attribute</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">Ambient</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">Ambient</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">Component</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">Component</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">Service</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">Service</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">Controller</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">Controller</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">autoinject</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">autoinject</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">bindTwoWay</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">bindTwoWay</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">bindOneWay</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">bindOneWay</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">bindString</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">bindString</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">bindExpression</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">bindExpression</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">defaults</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">ngDecorate</span>.<span style="color:#a6e22e">defaults</span>;
+}
+
+<span style="color:#66d9ef">declare</span> <span style="color:#66d9ef">module</span> <span style="color:#a6e22e">ngDecorate</span> {
+    <span style="color:#75715e">// Class decorators.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Attribute</span>(<span style="color:#a6e22e">config</span>: <span style="color:#66d9ef">DirectiveConfig</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">ClassDecorator</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Ambient</span>(<span style="color:#a6e22e">config</span>: <span style="color:#66d9ef">BaseConfig</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">ClassDecorator</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Ambient</span>(<span style="color:#a6e22e">target</span>: <span style="color:#66d9ef">Function</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Component</span>(<span style="color:#a6e22e">config</span>: <span style="color:#66d9ef">DirectiveConfig</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">ClassDecorator</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Service</span>(<span style="color:#a6e22e">config</span>: <span style="color:#66d9ef">ServiceConfig</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">ClassDecorator</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Controller</span>(<span style="color:#a6e22e">config</span>: <span style="color:#66d9ef">ControllerConfig</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">ClassDecorator</span>;
+
+    <span style="color:#75715e">// Property decorators.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">autoinject</span>(<span style="color:#a6e22e">target</span>: <span style="color:#66d9ef">any</span>, <span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>);
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">bindTwoWay</span>(<span style="color:#a6e22e">options</span>: <span style="color:#66d9ef">BindTwoWayOptions</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">PropertyDecorator</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">bindTwoWay</span>(<span style="color:#a6e22e">target</span>: <span style="color:#66d9ef">any</span>, <span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">bindOneWay</span>(<span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">PropertyDecorator</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">bindOneWay</span>(<span style="color:#a6e22e">target</span>: <span style="color:#66d9ef">any</span>, <span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">bindString</span>(<span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">PropertyDecorator</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">bindString</span>(<span style="color:#a6e22e">target</span>: <span style="color:#66d9ef">any</span>, <span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">bindExpression</span>(<span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">PropertyDecorator</span>;
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">bindExpression</span>(<span style="color:#a6e22e">target</span>: <span style="color:#66d9ef">any</span>, <span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span>;
+
+    <span style="color:#75715e">// Mutable configuration.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">defaults</span><span style="color:#f92672">:</span> {
+        <span style="color:#66d9ef">module</span><span style="color:#a6e22e">?</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">ng</span>.<span style="color:#a6e22e">IModule</span>;
+        <span style="color:#66d9ef">module</span><span style="color:#a6e22e">Name?</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span>;
+        <span style="color:#a6e22e">controllerAs</span>: <span style="color:#66d9ef">string</span>;
+        <span style="color:#a6e22e">makeTemplateUrl</span><span style="color:#f92672">:</span> (<span style="color:#a6e22e">selector</span>: <span style="color:#66d9ef">string</span>) <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">string</span>;
+    };
+
+    <span style="color:#75715e">// Abstract interface shared by configuration objects.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">BaseConfig</span> {
+        <span style="color:#75715e">// Angular module object. If provided, other module options are ignored, and
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// no new module is declared.
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">module</span><span style="color:#a6e22e">?</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">ng</span>.<span style="color:#a6e22e">IModule</span>;
+
+        <span style="color:#75715e">// Optional name for the new module created for this service or directive.
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// If omitted, the service or directive name is used.
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">module</span><span style="color:#a6e22e">Name?</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span>;
+
+        <span style="color:#75715e">// Names of other angular modules this module depends on.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">dependencies?</span>: <span style="color:#66d9ef">string</span>[];
+
+        <span style="color:#75715e">// DEPRECATED in favor of @autoinject.
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// Angular services that will be assigned to the class prototype.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">inject?</span>: <span style="color:#66d9ef">string</span>[];
+
+        <span style="color:#75715e">// DEPRECATED in favor of @autoinject.
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// Angular services that will be assigned to the class as static properties.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">injectStatic?</span>: <span style="color:#66d9ef">string</span>[];
+    }
+
+    <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">DirectiveConfig</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">BaseConfig</span>, <span style="color:#a6e22e">ng</span>.<span style="color:#a6e22e">IDirective</span> {
+        <span style="color:#75715e">// The name of the custom element or attribute. Used to derive module name,
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// directive name, and template url.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">selector</span>: <span style="color:#66d9ef">string</span>;
+    }
+
+    <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ServiceConfig</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">BaseConfig</span> {
+        <span style="color:#75715e">// The name of the service in the angular module system. Mandatory
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// due to minification woes.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">serviceName</span>: <span style="color:#66d9ef">string</span>;
+    }
+
+    <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ControllerConfig</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">BaseConfig</span> {
+        <span style="color:#75715e">// Mandatory controller name.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">controllerName</span>: <span style="color:#66d9ef">string</span>;
+        <span style="color:#75715e">// Optional service name. If included, the controller is published to
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// angular&#39;s DI as a service under this name.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">serviceName?</span>: <span style="color:#66d9ef">string</span>;
+    }
+
+    <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ControllerClass</span> <span style="color:#66d9ef">extends</span> Function {
+        <span style="color:#a6e22e">template?</span>: <span style="color:#66d9ef">string</span><span style="color:#f92672">|</span>Function;
+        <span style="color:#a6e22e">templateUrl?</span>: <span style="color:#66d9ef">string</span><span style="color:#f92672">|</span>Function;
+        <span style="color:#a6e22e">link?</span>: <span style="color:#66d9ef">Function</span>;
+        <span style="color:#a6e22e">compile?</span>: <span style="color:#66d9ef">any</span>;
+    }
+
+    <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">BindTwoWayOptions</span> {
+        <span style="color:#75715e">// Adds `*` to the property descriptor, marking it for `$watchCollection`.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">collection?</span>: <span style="color:#66d9ef">boolean</span>;
+        <span style="color:#75715e">// Adds `?` to the property descriptor, marking it optional.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">optional?</span>: <span style="color:#66d9ef">boolean</span>;
+        <span style="color:#75715e">// Adds an external property name to the binding.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">key?</span>: <span style="color:#66d9ef">string</span>;
+    }
+}
+
+<span style="color:#66d9ef">declare</span> <span style="color:#a6e22e">module</span> <span style="color:#e6db74">&#39;foliant&#39;</span> {
+    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StringSet</span> {
+        <span style="color:#66d9ef">constructor</span>(<span style="color:#a6e22e">strings?</span>: <span style="color:#66d9ef">string</span>[]);
+        <span style="color:#a6e22e">add</span>(<span style="color:#66d9ef">string</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span>;
+        <span style="color:#a6e22e">del</span>(<span style="color:#66d9ef">string</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span>;
+        <span style="color:#a6e22e">has</span>(<span style="color:#66d9ef">string</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">boolean</span>;
+    }
+    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Traits</span> {
+        <span style="color:#66d9ef">constructor</span>(<span style="color:#a6e22e">words?</span>: <span style="color:#66d9ef">string</span>[]);
+        <span style="color:#66d9ef">static</span> <span style="color:#a6e22e">StringSet</span>: <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">StringSet</span>;
+        <span style="color:#a6e22e">examine</span>(<span style="color:#a6e22e">words</span>: <span style="color:#66d9ef">string</span>[])<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span>;
+        <span style="color:#a6e22e">generator</span>()<span style="color:#f92672">:</span> () <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">string</span>;
+        <span style="color:#a6e22e">knownSounds</span>: <span style="color:#66d9ef">StringSet</span>;
+        <span style="color:#a6e22e">knownVowels</span>: <span style="color:#66d9ef">StringSet</span>;
+    }
+    <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">default</span> <span style="color:#a6e22e">Traits</span>;
+}
+
+<span style="color:#66d9ef">declare</span> <span style="color:#a6e22e">type</span> <span style="color:#a6e22e">StringMap</span> <span style="color:#f92672">=</span> {[<span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>]<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span>};
+</pre></details><h3 id="build-configuration"><span class="heading-prefix" aria-hidden="true"></span>Build Configuration<a href="#build-configuration" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>Install additional tools:</p>
+<pre style="color:#f8f8f2;background-color:#272822">npm i --save-dev browser-sync gulp gulp-concat gulp-load-plugins gulp-ng-html2js gulp-plumber gulp-replace gulp-rimraf gulp-sourcemaps gulp-statil gulp-watch jspm stylific tsd yargs
+</pre>
+<p>Create a <code>gulpfile.js</code> with the following:</p>
+<details class="details fancy-typography"><summary>gulpfile.js</summary><pre style="color:#f8f8f2;background-color:#272822"><span style="color:#e6db74">&#39;use strict&#39;</span>;
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">gulp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;gulp&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">$</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;gulp-load-plugins&#39;</span>)();
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">bsync</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;browser-sync&#39;</span>).<span style="color:#a6e22e">create</span>();
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">flags</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;yargs&#39;</span>).<span style="color:#a6e22e">argv</span>;
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">pt</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;path&#39;</span>);
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">prod</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">flags</span>.<span style="color:#a6e22e">prod</span> <span style="color:#f92672">===</span> <span style="color:#66d9ef">true</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">flags</span>.<span style="color:#a6e22e">prod</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;true&#39;</span>;
+}
+
+<span style="color:#75715e">/*--------------------------------- Scripts ---------------------------------*/</span>
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;scripts:clear&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">src</span>(<span style="color:#e6db74">&#39;dist/app/**/*.js&#39;</span>, {<span style="color:#a6e22e">read</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">false</span>, <span style="color:#a6e22e">allowEmpty</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>})
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">plumber</span>())
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">rimraf</span>());
+});
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;scripts:views&#39;</span>, [<span style="color:#e6db74">&#39;scripts:clear&#39;</span>], <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">src</span>(<span style="color:#e6db74">&#39;src/app/**/*.html&#39;</span>)
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">plumber</span>())
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">ngHtml2js</span>({<span style="color:#a6e22e">moduleName</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;app&#39;</span>}))
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">concat</span>(<span style="color:#e6db74">&#39;views.js&#39;</span>))
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">replace</span>(<span style="color:#e6db74">/^([^]*)$/</span>,
+            <span style="color:#e6db74">&#39;System.register([], function() {\n&#39;</span> <span style="color:#f92672">+</span>
+            <span style="color:#e6db74">&#39;  return {\n&#39;</span> <span style="color:#f92672">+</span>
+            <span style="color:#e6db74">&#39;    setters: [],\n&#39;</span> <span style="color:#f92672">+</span>
+            <span style="color:#e6db74">&#39;    execute: function() {\n&#39;</span> <span style="color:#f92672">+</span>
+            <span style="color:#e6db74">&#39;      $1\n&#39;</span> <span style="color:#f92672">+</span>
+            <span style="color:#e6db74">&#39;    }\n&#39;</span> <span style="color:#f92672">+</span>
+            <span style="color:#e6db74">&#39;  };\n&#39;</span> <span style="color:#f92672">+</span>
+            <span style="color:#e6db74">&#39;});\n&#39;</span>))
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">dest</span>(<span style="color:#e6db74">&#39;dist/app&#39;</span>));
+});
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;scripts:ts&#39;</span>, [<span style="color:#e6db74">&#39;scripts:views&#39;</span>], <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">src</span>(<span style="color:#e6db74">&#39;src/app/**/*.ts&#39;</span>)
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">plumber</span>())
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">sourcemaps</span>.<span style="color:#a6e22e">init</span>())
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">typescript</span>({
+            <span style="color:#a6e22e">noExternalResolve</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>,
+            <span style="color:#a6e22e">typescript</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;typescript&#39;</span>),
+            <span style="color:#a6e22e">target</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;ES5&#39;</span>,
+            <span style="color:#a6e22e">module</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;system&#39;</span>,
+            <span style="color:#a6e22e">experimentalDecorators</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>
+        }))
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">sourcemaps</span>.<span style="color:#a6e22e">write</span>())
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">dest</span>(<span style="color:#e6db74">&#39;dist/app&#39;</span>))
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">bsync</span>.<span style="color:#a6e22e">reload</span>({<span style="color:#a6e22e">stream</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>}));
+});
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;scripts:watch&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">watch</span>(<span style="color:#e6db74">&#39;src/app/**/*&#39;</span>, <span style="color:#66d9ef">function</span>() {<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">start</span>(<span style="color:#e6db74">&#39;scripts:ts&#39;</span>)});
+});
+
+<span style="color:#75715e">/*---------------------------------- HTML -----------------------------------*/</span>
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;html:clear&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">src</span>([
+            <span style="color:#e6db74">&#39;dist/**/*.html&#39;</span>,
+            <span style="color:#e6db74">&#39;!dist/app/**/*&#39;</span>,
+            <span style="color:#e6db74">&#39;!dist/jspm_packages/**/*&#39;</span>
+        ], {<span style="color:#a6e22e">read</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">false</span>, <span style="color:#a6e22e">allowEmpty</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>})
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">plumber</span>())
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">rimraf</span>());
+});
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;html:compile&#39;</span>, [<span style="color:#e6db74">&#39;html:clear&#39;</span>], <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">src</span>(<span style="color:#e6db74">&#39;src/html/**/*&#39;</span>)
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">plumber</span>())
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">statil</span>({
+            <span style="color:#a6e22e">stripPrefix</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;src/html&#39;</span>,
+            <span style="color:#a6e22e">imports</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">prod</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">prod</span>}
+        }))
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">dest</span>(<span style="color:#e6db74">&#39;dist&#39;</span>))
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">bsync</span>.<span style="color:#a6e22e">reload</span>({<span style="color:#a6e22e">stream</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span>}));
+});
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;html:watch&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">watch</span>(<span style="color:#e6db74">&#39;src/html/**/*&#39;</span>, <span style="color:#66d9ef">function</span>() {<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">start</span>(<span style="color:#e6db74">&#39;html:compile&#39;</span>)});
+});
+
+<span style="color:#75715e">/*--------------------------------- Styles ----------------------------------*/</span>
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;styles:copy&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">src</span>(<span style="color:#e6db74">&#39;node_modules/stylific/lib/stylific.css&#39;</span>)
+        .<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">dest</span>(<span style="color:#e6db74">&#39;dist/css&#39;</span>));
+});
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;styles:watch&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">watch</span>(<span style="color:#e6db74">&#39;node_modules/stylific/lib/stylific.css&#39;</span>, <span style="color:#66d9ef">function</span>() {<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">start</span>(<span style="color:#e6db74">&#39;styles:copy&#39;</span>)});
+});
+
+<span style="color:#75715e">/*--------------------------------- System ----------------------------------*/</span>
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;system:copy&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">src</span>(<span style="color:#e6db74">&#39;system.config.js&#39;</span>).<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">dest</span>(<span style="color:#e6db74">&#39;dist&#39;</span>));
+});
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;system:watch&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">watch</span>(<span style="color:#e6db74">&#39;system.config.js&#39;</span>, <span style="color:#66d9ef">function</span>() {<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">start</span>(<span style="color:#e6db74">&#39;system:copy&#39;</span>)});
+});
+
+<span style="color:#75715e">/*--------------------------------- Server ----------------------------------*/</span>
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;server&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">bsync</span>.<span style="color:#a6e22e">init</span>({
+        <span style="color:#a6e22e">startPath</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;/ng-next-gen/&#39;</span>,
+        <span style="color:#a6e22e">server</span><span style="color:#f92672">:</span> {
+            <span style="color:#a6e22e">baseDir</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;dist&#39;</span>,
+            <span style="color:#a6e22e">middleware</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>, <span style="color:#a6e22e">next</span>) {
+                <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">url</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">url</span>.<span style="color:#a6e22e">replace</span>(<span style="color:#e6db74">/^\/ng-next-gen/</span>, <span style="color:#e6db74">&#39;/&#39;</span>)
+                <span style="color:#a6e22e">next</span>()
+            }
+        },
+        <span style="color:#a6e22e">port</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">9238</span>,
+        <span style="color:#a6e22e">online</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">false</span>
+    });
+});
+
+<span style="color:#75715e">/*--------------------------------- Default ---------------------------------*/</span>
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;build&#39;</span>, [<span style="color:#e6db74">&#39;scripts:ts&#39;</span>, <span style="color:#e6db74">&#39;html:compile&#39;</span>, <span style="color:#e6db74">&#39;styles:copy&#39;</span>, <span style="color:#e6db74">&#39;system:copy&#39;</span>]);
+
+<span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">task</span>(<span style="color:#e6db74">&#39;default&#39;</span>, [<span style="color:#e6db74">&#39;build&#39;</span>, <span style="color:#e6db74">&#39;scripts:watch&#39;</span>, <span style="color:#e6db74">&#39;html:watch&#39;</span>, <span style="color:#e6db74">&#39;styles:watch&#39;</span>, <span style="color:#e6db74">&#39;system:watch&#39;</span>], <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">gulp</span>.<span style="color:#a6e22e">start</span>(<span style="color:#e6db74">&#39;server&#39;</span>);
+});
+</pre></details><h3 id="html"><span class="heading-prefix" aria-hidden="true"></span>HTML<a href="#html" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>To keep it dead simple, we&rsquo;ll use just one page. Create <code>src/html/index.html</code>
+with the following:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span>&gt;
+    &lt;<span style="color:#f92672">head</span>&gt;
+        &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/ng-next-gen/css/stylific.css&#34;</span>&gt;
+        &lt;<span style="color:#f92672">base</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/ng-next-gen/&#34;</span>&gt;&lt;/<span style="color:#f92672">base</span>&gt;
+    &lt;/<span style="color:#f92672">head</span>&gt;
+    &lt;<span style="color:#f92672">body</span>&gt;
+        &lt;<span style="color:#f92672">sf-article</span>&gt;
+            &lt;<span style="color:#f92672">word-generator</span>&gt;&lt;/<span style="color:#f92672">word-generator</span>&gt;
+        &lt;/<span style="color:#f92672">sf-article</span>&gt;
+
+        &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;jspm_packages/es6-module-loader.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+        &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;jspm_packages/system.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+        &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;system.config.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+        &lt;<span style="color:#f92672">script</span>&gt;
+            <span style="color:#a6e22e">System</span>.<span style="color:#66d9ef">import</span>(<span style="color:#e6db74">&#39;boot&#39;</span>);
+        &lt;/<span style="color:#f92672">script</span>&gt;
+    &lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</pre>
+<p>You&rsquo;ll want to bundle your scripts for production; we&rsquo;ll deal with this at the
+end of the tutorial.</p>
+
+<p>At this point, we&rsquo;re ready to start coding!</p>
+<h2 id="modules"><span class="heading-prefix" aria-hidden="true"></span>Modules<a href="#modules" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Our first step is to take advantage of ES6 modules. We&rsquo;ll disregard angular
+&ldquo;modules&rdquo; (a more accurate name would be &ldquo;DI containers&rdquo;), using just one for
+the entire app.</p>
+
+<p>Create <code>src/app/app.ts</code>:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;angular&#39;</span>;
+
+<span style="color:#75715e">// Our one and only angular module.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">angular</span>.<span style="color:#a6e22e">module</span>(<span style="color:#e6db74">&#39;app&#39;</span>, [<span style="color:#e6db74">&#39;ng&#39;</span>]);
+</pre>
+<p>Create <code>src/app/boot.ts</code>:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">app</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;app&#39;</span>;
+
+<span style="color:#75715e">// Bootstrap the app.
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">angular</span>.<span style="color:#a6e22e">element</span>(document).<span style="color:#a6e22e">ready</span>(() <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> {
+    <span style="color:#a6e22e">angular</span>.<span style="color:#a6e22e">bootstrap</span>(document.<span style="color:#a6e22e">body</span>, [<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">name</span>], {
+        <span style="color:#a6e22e">strictDi</span>: <span style="color:#66d9ef">true</span>
+    });
+});
+</pre>
+<p>Why manual bootstrap instead of <code>ng-app</code>? This is unavoidable due to the async
+nature of ES6 modules. If you include <code>ng-app</code> on the page, <code>angular</code> will
+bootstrap the application before most of your application code runs. At that
+point, it will be too late to run services or register directives. Manual
+bootstrap solves this problem.</p>
+
+<p>Invoke <code>gulp</code> to start up the pipeline and the local server. You should see a
+blank page and no console errors. Now it&rsquo;s time to add some content.</p>
+<h2 id="components"><span class="heading-prefix" aria-hidden="true"></span>Components<a href="#components" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Next generation frameworks use custom elements as building blocks of your
+application. This is also the best practice in Angular 1.x, which gives you the
+necessary tools in the form of directives. Here&rsquo;s a custom element defined with
+the raw Angular 1.x API:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">app</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;app&#39;</span>;
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">directive</span>(<span style="color:#e6db74">&#39;wordGenerator&#39;</span>, <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> {
+        <span style="color:#a6e22e">restrict</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;E&#39;</span>,
+        <span style="color:#a6e22e">scope</span><span style="color:#f92672">:</span> {},
+        <span style="color:#a6e22e">templateUrl</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;word-generator/word-generator.html&#39;</span>,
+        <span style="color:#a6e22e">controllerAs</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;self&#39;</span>,
+        <span style="color:#a6e22e">bindToController</span>: <span style="color:#66d9ef">true</span>,
+        <span style="color:#a6e22e">controller</span>: <span style="color:#66d9ef">ViewModel</span>
+    };
+});
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ViewModel</span> {}
+</pre>
+<p>All of these options are required for a proper custom element definition. This
+API is pretty bad. We&rsquo;ll use custom decorators to make it semantic. I&rsquo;m going
+to cheat and import a library designed for this:
+<a href="https://github.com/mitranim/ng-decorate" target="_blank" rel="noopener noreferrer">ng-decorate<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>. We have already
+installed it with <code>jspm</code>. Create <code>src/app/words-generator/words-generator.ts</code>
+with:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">Component</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;ng-decorate&#39;</span>;
+
+<span style="color:#66d9ef">@Component</span>({
+    <span style="color:#a6e22e">selector</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;word-generator&#39;</span>
+})
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ViewModel</span> {}
+</pre>
+<p>Much simpler! The decorator takes any directive options and passes them to
+Angular, adding some great defaults. <code>ng-decorate</code> assumes <code>templateUrl</code> to be
+<code>&lt;element-name&gt;/&lt;element-name&gt;.html</code>, which is exactly how we structure this
+app. The decorated class becomes the controller (the viewmodel) of the custom
+element.</p>
+
+<p>Why decorators? Because you can put them at the top of a class, and they look
+pretty.</p>
+
+<p>You&rsquo;ll notice we didn&rsquo;t tell the decorator which angular module to use. We&rsquo;ll
+configure the decorator library to use our main module for everything. Modify
+your <code>src/app/app.ts</code>:</p>
+<pre style="color:#f8f8f2;background-color:#272822">import &#39;angular&#39;;
+<span style="color:#a6e22e">+ import {defaults} from &#39;ng-decorate&#39;;
+</span><span style="color:#a6e22e"></span>
+// Our one and only angular module.
+export var app = angular.module(&#39;app&#39;, [&#39;ng&#39;]);
+
+<span style="color:#a6e22e">+ // Use this module in all directive and service declarations.
+</span><span style="color:#a6e22e"></span><span style="color:#a6e22e">+ defaults.module = app;
+</span></pre>
+<p>Let&rsquo;s add a view to this element. This is going to be a heavily simplified
+version of the <a href="https://mitranim.com/demos/foliant/" target="_blank" rel="noopener noreferrer">foliant demo<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> because I&rsquo;m lazy.</p>
+
+<p>Create a file <code>src/app/word-generator/word-generator.html</code> with:</p>
+<details class="details fancy-typography"><summary>src/app/word-generator/word-generator.html</summary><pre style="color:#f8f8f2;background-color:#272822">&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">layout</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gaps-1-v&#34;</span>&gt;
+    <span style="color:#75715e">&lt;!--</span><span style="color:#75715e"> Left column: source words </span><span style="color:#75715e">--&gt;</span>
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">flex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gaps-1-v&#34;</span>&gt;
+        &lt;<span style="color:#f92672">h3</span> <span style="color:#a6e22e">theme</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text-primary&#34;</span> <span style="color:#a6e22e">layout</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;row-between&#34;</span>&gt;
+            &lt;<span style="color:#f92672">span</span>&gt;Source Words&lt;/<span style="color:#f92672">span</span>&gt;
+            &lt;<span style="color:#f92672">span</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;indicator&#34;</span>&gt;&lt;/<span style="color:#f92672">span</span>&gt;
+        &lt;/<span style="color:#f92672">h3</span>&gt;
+        &lt;<span style="color:#f92672">form</span> <span style="color:#a6e22e">ng-submit</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;self.add()&#34;</span> <span style="color:#a6e22e">layout</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gaps-1-v&#34;</span>
+                    <span style="color:#a6e22e">sf-tooltip</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{self.error}}&#34;</span> <span style="color:#a6e22e">sf-trigger</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{!!self.error}}&#34;</span>&gt;
+            &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">flex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;11&#34;</span> <span style="color:#a6e22e">tabindex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span> <span style="color:#a6e22e">ng-model</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;self.word&#34;</span>&gt;
+            &lt;<span style="color:#f92672">button</span> <span style="color:#a6e22e">flex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span> <span style="color:#a6e22e">theme</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;primary&#34;</span> <span style="color:#a6e22e">tabindex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span>&gt;Add&lt;/<span style="color:#f92672">button</span>&gt;
+        &lt;/<span style="color:#f92672">form</span>&gt;
+        &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">ng-repeat</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;word in self.words&#34;</span> <span style="color:#a6e22e">layout</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;row-between gaps-1-v&#34;</span>&gt;
+            &lt;<span style="color:#f92672">span</span> <span style="color:#a6e22e">flex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;11&#34;</span> <span style="color:#a6e22e">layout</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;cross-center&#34;</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;padding-1&#34;</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;margin-1-r&#34;</span>&gt;{{word}}&lt;/<span style="color:#f92672">span</span>&gt;
+            &lt;<span style="color:#f92672">button</span> <span style="color:#a6e22e">flex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span> <span style="color:#a6e22e">ng-click</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;self.remove(word)&#34;</span>&gt;✕&lt;/<span style="color:#f92672">button</span>&gt;
+        &lt;/<span style="color:#f92672">div</span>&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
+
+    <span style="color:#75715e">&lt;!--</span><span style="color:#75715e"> Right column: generated results </span><span style="color:#75715e">--&gt;</span>
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">flex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gaps-1-v&#34;</span>&gt;
+        &lt;<span style="color:#f92672">h3</span> <span style="color:#a6e22e">theme</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text-accent&#34;</span>&gt;Generated Words&lt;/<span style="color:#f92672">h3</span>&gt;
+        &lt;<span style="color:#f92672">form</span> <span style="color:#a6e22e">ng-submit</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;self.generate()&#34;</span> <span style="color:#a6e22e">layout</span>&gt;
+            &lt;<span style="color:#f92672">button</span> <span style="color:#a6e22e">flex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span> <span style="color:#a6e22e">theme</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;accent&#34;</span> <span style="color:#a6e22e">tabindex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span>&gt;Generate&lt;/<span style="color:#f92672">button</span>&gt;
+        &lt;/<span style="color:#f92672">form</span>&gt;
+        &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">ng-repeat</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;word in self.results&#34;</span> <span style="color:#a6e22e">layout</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;row-between&#34;</span>&gt;
+            &lt;<span style="color:#f92672">button</span> <span style="color:#a6e22e">flex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span> <span style="color:#a6e22e">ng-click</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;self.pick(word)&#34;</span>&gt;←&lt;/<span style="color:#f92672">button</span>&gt;
+            &lt;<span style="color:#f92672">span</span> <span style="color:#a6e22e">flex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;11&#34;</span> <span style="color:#a6e22e">layout</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;cross-center&#34;</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;padding-1&#34;</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;margin-1-l&#34;</span>&gt;{{word}}&lt;/<span style="color:#f92672">span</span>&gt;
+        &lt;/<span style="color:#f92672">div</span>&gt;
+        &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">ng-if</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;self.depleted&#34;</span> <span style="color:#a6e22e">layout</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;cross-center&#34;</span>&gt;
+            &lt;<span style="color:#f92672">span</span> <span style="color:#a6e22e">theme</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text-warn&#34;</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;padding-1&#34;</span>&gt;(depleted)&lt;/<span style="color:#f92672">span</span>&gt;
+        &lt;/<span style="color:#f92672">div</span>&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
+&lt;/<span style="color:#f92672">div</span>&gt;
+</pre></details>
+<p>It won&rsquo;t have any functionality yet. We&rsquo;ll need to grab some data over ajax,
+which brings us to Angular&rsquo;s dependency injection and services.</p>
+<h2 id="dealing-with-angular-di"><span class="heading-prefix" aria-hidden="true"></span>Dealing With Angular DI<a href="#dealing-with-angular-di" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>If your code runs before the angular application is bootstrapped, how do you get
+hold of angular services that are only available through dependency injection?</p>
+
+<p>You could try <code>injector.get</code>:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">$q</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">angular</span>.<span style="color:#a6e22e">injector</span>([<span style="color:#e6db74">&#39;ng&#39;</span>]).<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;$q&#39;</span>);
+<span style="color:#75715e">// or
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">$q</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">angular</span>.<span style="color:#a6e22e">injector</span>([<span style="color:#e6db74">&#39;app&#39;</span>, <span style="color:#e6db74">&#39;ng&#39;</span>]).<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;$q&#39;</span>);
+</pre>
+<p>But this will give us the wrong instance of the injector. Angular will create
+another one during the bootstrap phase, which will produce a different <code>$q</code>. Our
+old instance of <code>$q</code> won&rsquo;t be able to automatically invoke digests in our app.
+We also can&rsquo;t synchronously get services from our own application, if we happen
+to still have code that is only available through DI.</p>
+
+<p>Bottom line, you can only get hold of angular services during or after the
+bootstrap phase by using <code>module.run</code>, <code>module.factory</code> or other methods that
+take advantage of dependency injection. <code>ng-decorate</code> abstracts this away by
+capturing injected services as static or prototype properties of the decorated
+class. Example:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">Ambient</span>, <span style="color:#a6e22e">autoinject</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;ng-decorate&#39;</span>;
+
+<span style="color:#66d9ef">@Ambient</span>
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Record</span> {
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * Compile-time type information.
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#75715e">// Prototype property.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">@autoinject</span> <span style="color:#a6e22e">$q</span>: <span style="color:#66d9ef">ng.IQService</span>;
+    <span style="color:#75715e">// Static property.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">@autoinject</span> <span style="color:#66d9ef">static</span> <span style="color:#a6e22e">$http</span>: <span style="color:#66d9ef">ng.IHttpService</span>;
+
+    <span style="color:#66d9ef">constructor</span>() {
+        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">$q</span>);
+        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">Record</span>.<span style="color:#a6e22e">$http</span>);
+    }
+}
+</pre>
+<p>If you call <code>new Record()</code> immediately, it will log <code>undefined</code> twice. However,
+if you instantiate it in a component, it will already have both services
+available.</p>
+
+<p>Finally, to get hold of contextual dependencies like <code>$scope</code> or <code>$element</code>,
+you&rsquo;ll use a stock Angular feature: annotating the controller class with an
+<code>$inject</code> property.</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">Component</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;ng-decorate&#39;</span>;
+
+<span style="color:#66d9ef">@Component</span>({
+    <span style="color:#a6e22e">selector</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;custom-element&#39;</span>
+})
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ViewModel</span> {
+    <span style="color:#75715e">// Compile-time type information.
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">element</span>: <span style="color:#66d9ef">HTMLElement</span>;
+
+    <span style="color:#66d9ef">static</span> <span style="color:#a6e22e">$inject</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;$element&#39;</span>]; <span style="color:#75715e">// stock Angular feature
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">constructor</span>(<span style="color:#a6e22e">$element</span>) {
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">element</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">$element</span>[<span style="color:#ae81ff">0</span>];
+    }
+}
+</pre>
+<p>Now that we know how to get hold of angular services, let&rsquo;s take advantage of
+<code>$http</code> and create a model class with ajax capability.</p>
+<h2 id="services"><span class="heading-prefix" aria-hidden="true"></span>Services<a href="#services" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Create <code>src/models/words.ts</code>:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">Service</span>, <span style="color:#a6e22e">autoinject</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;ng-decorate&#39;</span>;
+
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">wordsUrl</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://incandescent-torch-3438.firebaseio.com/foliant/defaults/words/eng.json&#39;</span>;
+
+<span style="color:#66d9ef">@Service</span>({
+    <span style="color:#a6e22e">serviceName</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Words&#39;</span>
+})
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Words</span> {
+    <span style="color:#66d9ef">@autoinject</span> <span style="color:#66d9ef">static</span> <span style="color:#a6e22e">$http</span>: <span style="color:#66d9ef">ng.IHttpService</span>;
+    [<span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>]<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span>;
+
+    <span style="color:#66d9ef">constructor</span>(<span style="color:#a6e22e">fields?</span>: <span style="color:#66d9ef">StringMap</span>) {
+        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">fields</span>) <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">key</span> <span style="color:#66d9ef">in</span> <span style="color:#a6e22e">fields</span>) <span style="color:#66d9ef">this</span>[<span style="color:#a6e22e">key</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">fields</span>[<span style="color:#a6e22e">key</span>];
+    }
+
+    <span style="color:#66d9ef">static</span> <span style="color:#a6e22e">readAll() {</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">$http</span>({
+            <span style="color:#a6e22e">url</span>: <span style="color:#66d9ef">wordsUrl</span>,
+            <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;GET&#39;</span>
+        })
+        .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Words</span>(<span style="color:#f92672">&lt;</span><span style="color:#a6e22e">StringMap</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>));
+    }
+}
+</pre>
+<p>Whoah what&rsquo;s going on in here? Let&rsquo;s take this slow.</p>
+<h3 id="1-service-decorator"><span class="heading-prefix" aria-hidden="true"></span>1. Service decorator<a href="#1-service-decorator" class="heading-anchor" aria-hidden="true"></a></h3><pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">Service</span>, <span style="color:#a6e22e">autoinject</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;ng-decorate&#39;</span>;
+
+<span style="color:#66d9ef">@Service</span>({
+    <span style="color:#a6e22e">serviceName</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Words&#39;</span>
+})
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Words</span> {
+    <span style="color:#66d9ef">@autoinject</span> <span style="color:#66d9ef">static</span> <span style="color:#a6e22e">$http</span>;
+}
+</pre>
+<p>This is a shortcut to:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">app</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;app&#39;</span>;
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">factory</span>(<span style="color:#e6db74">&#39;Words&#39;</span>, [<span style="color:#e6db74">&#39;$http&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">$http</span>) {
+    <span style="color:#a6e22e">Words</span>.<span style="color:#a6e22e">$http</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">$http</span>;
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Words</span>;
+}]);
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Words</span> {}
+</pre>
+<p>That&rsquo;s basically all it does. You can also include the <code>inject</code> option and it&rsquo;ll
+assign the injected services to the prototype, same as we saw above in <a href="#dealing-with-angular-di"><span class="hash-prefix noprint" aria-hidden="true">#</span>Dealing
+With Angular DI</a>.</p>
+
+<p>This lets you combine ES6 exports with Angular&rsquo;s DI. You can export it the ES6
+way and still be able to get hold of injected services. The decorator will also
+publish the class to the DI system, which is handy if your app has old parts
+that still rely on it.</p>
+
+<p>If you&rsquo;re writing an application from scratch and don&rsquo;t need DI in Karma tests,
+replace <code>Service</code> with <code>Ambient</code>. It doesn&rsquo;t require a service name and doesn&rsquo;t
+publish your class to Angular&rsquo;s DI system. Automatic dependency injection will
+still work.</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#f92672">- import {Service, autoinject} from &#39;ng-decorate&#39;;
+</span><span style="color:#f92672"></span><span style="color:#a6e22e">+ import {Ambient, autoinject} from &#39;ng-decorate&#39;;
+</span><span style="color:#a6e22e"></span>
+<span style="color:#f92672">- @Service({
+</span><span style="color:#f92672"></span><span style="color:#f92672">-   serviceName: &#39;Words&#39;
+</span><span style="color:#f92672"></span><span style="color:#f92672">- })
+</span><span style="color:#f92672"></span><span style="color:#a6e22e">+ @Ambient
+</span><span style="color:#a6e22e"></span>export class Words {
+<span style="color:#f92672">-   @autoinject static $http;
+</span></pre><h3 id="2-even-weirder-type-annotations-this-is-not-my-grandfather-s-javascript"><span class="heading-prefix" aria-hidden="true"></span>2. Even weirder type annotations&hellip; this is not my grandfather&rsquo;s JavaScript!<a href="#2-even-weirder-type-annotations-this-is-not-my-grandfather-s-javascript" class="heading-anchor" aria-hidden="true"></a></h3><pre style="color:#f8f8f2;background-color:#272822">[<span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>]<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span>;
+
+<span style="color:#75715e">/* ... */</span>
+
+<span style="color:#f92672">&lt;</span><span style="color:#a6e22e">StringMap</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>;
+</pre>
+<p>This is also a part of TypeScript. Simply disregard this if you&rsquo;re using Babel.
+The former indicates what kind of data the object can hold, and the latter is
+an inline type cast.</p>
+<h3 id="3-ajax"><span class="heading-prefix" aria-hidden="true"></span>3. Ajax<a href="#3-ajax" class="heading-anchor" aria-hidden="true"></a></h3><pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">static</span> <span style="color:#a6e22e">readAll() {</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">$http</span>({
+        <span style="color:#a6e22e">url</span>: <span style="color:#66d9ef">url</span>,
+        <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;GET&#39;</span>
+    })
+    .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Words</span>(<span style="color:#f92672">&lt;</span><span style="color:#a6e22e">StringMap</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>));
+}
+</pre>
+<p>We&rsquo;re using the injected <code>$http</code> service to grab some example words from the
+backend for the <a href="https://mitranim.com/demos/foliant/" target="_blank" rel="noopener noreferrer">demo<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> on which this component is
+based. <code>this</code> refers to the class, and the arrow function transforms the
+response, converting it into a new instance of this data model. This is a
+typical pattern. In a real app, you would have a root model class that
+encapsulates ajax, validation and transformation logic.</p>
+
+<p>Another typical pattern is to have aggregator modules that re-export everything
+from their folder. Create <code>src/app/models/all.ts</code>:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">export</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;./words&#39;</span>;
+</pre>
+<p>This is handy for maintenance reasons.</p>
+
+<p>Now let&rsquo;s wrap this up by adding real functionality to the element.</p>
+<h2 id="demo"><span class="heading-prefix" aria-hidden="true"></span>Demo<a href="#demo" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Modify your <code>src/app/boot.ts</code>:</p>
+<details class="details fancy-typography"><summary>src/app/boot.ts</summary><pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">app</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;app&#39;</span>;
+
+<span style="color:#75715e">// Pull the application together.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;views&#39;</span>;
+<span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;models/all&#39;</span>;
+<span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;word-generator/word-generator&#39;</span>;
+
+<span style="color:#75715e">// Bootstrap the app.
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">angular</span>.<span style="color:#a6e22e">element</span>(document).<span style="color:#a6e22e">ready</span>(() <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> {
+    <span style="color:#a6e22e">angular</span>.<span style="color:#a6e22e">bootstrap</span>(document.<span style="color:#a6e22e">body</span>, [<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">name</span>], {
+        <span style="color:#a6e22e">strictDi</span>: <span style="color:#66d9ef">true</span>
+    });
+});
+</pre></details><pre style="color:#f8f8f2;background-color:#272822">import {app} from &#39;app&#39;;
+
+<span style="color:#a6e22e">+ // Pull the application together.
+</span><span style="color:#a6e22e"></span><span style="color:#a6e22e">+ import &#39;views&#39;;
+</span><span style="color:#a6e22e"></span><span style="color:#a6e22e">+ import &#39;models/all&#39;;
+</span><span style="color:#a6e22e"></span><span style="color:#a6e22e">+ import &#39;word-generator/word-generator&#39;;
+</span></pre>
+<p>Replace the contents of <code>src/app/word-generator/word-generator.ts</code> with this:</p>
+<details class="details fancy-typography"><summary>src/app/word-generator/word-generator.ts</summary><pre style="color:#f8f8f2;background-color:#272822"><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">Traits</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;foliant&#39;</span>;
+<span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">Component</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;ng-decorate&#39;</span>;
+<span style="color:#66d9ef">import</span> {<span style="color:#a6e22e">Words</span>} <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;models/all&#39;</span>;
+
+<span style="color:#66d9ef">@Component</span>({
+    <span style="color:#a6e22e">selector</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;word-generator&#39;</span>
+})
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">VM</span> {
+    <span style="color:#75715e">// Source words.
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">words</span>: <span style="color:#66d9ef">string</span>[];
+    <span style="color:#75715e">// Generated words.
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">results</span>: <span style="color:#66d9ef">string</span>[] <span style="color:#f92672">=</span> [];
+    <span style="color:#75715e">// Input.
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">word</span>: <span style="color:#66d9ef">string</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>;
+    <span style="color:#75715e">// Error.
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">error</span>: <span style="color:#66d9ef">string</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;
+    <span style="color:#75715e">// True when the generator is out of words.
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">depleted</span>: <span style="color:#66d9ef">boolean</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+    <span style="color:#75715e">// Words generator.
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">gen</span><span style="color:#f92672">:</span> () <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">string</span>;
+
+    <span style="color:#66d9ef">constructor</span>() {
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">reload</span>().<span style="color:#a6e22e">then</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">generate</span>.<span style="color:#a6e22e">bind</span>(<span style="color:#66d9ef">this</span>));
+    }
+
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * Reloads the example words from the backend.
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">reload() {</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Words</span>.<span style="color:#a6e22e">readAll</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">words</span> <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> {
+            <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span> <span style="color:#f92672">=</span> Object.<span style="color:#a6e22e">keys</span>(<span style="color:#a6e22e">words</span>).<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">key</span> <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">words</span>[<span style="color:#a6e22e">key</span>]);
+        });
+    }
+
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * Word count limit.
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">get</span> <span style="color:#a6e22e">limit</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span> {<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">12</span>}
+
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * Generates a group of words.
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">generate</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+        <span style="color:#75715e">// Remove error, if any.
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">error</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>;
+
+        <span style="color:#75715e">// Regenerate the generator, if necessary.
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">gen</span>) <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">gen</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Traits</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>).<span style="color:#a6e22e">generator</span>();
+        <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">words</span> <span style="color:#f92672">=</span> [];
+
+        <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">limit</span>) {
+            <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">word</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">gen</span>();
+            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">word</span>) <span style="color:#66d9ef">break</span>;
+            <span style="color:#75715e">// Skip source words.
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">~</span><span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">indexOf</span>(<span style="color:#a6e22e">word</span>)) <span style="color:#66d9ef">continue</span>;
+            <span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">word</span>);
+        }
+
+        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">limit</span>) <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">depleted</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">depleted</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">results</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">words</span>;
+    }
+
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * Adds a word to the source or displays an error message.
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">add</span>(<span style="color:#a6e22e">word</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">word</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">word</span>.<span style="color:#a6e22e">toLowerCase</span>();
+
+        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">word</span>) {
+            <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">error</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Please input a word.&#39;</span>;
+            <span style="color:#66d9ef">return</span>;
+        }
+
+        <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">word</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">2</span>) {
+            <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">error</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;The word is too short.&#39;</span>;
+            <span style="color:#66d9ef">return</span>;
+        }
+
+        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">~</span><span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">indexOf</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">word</span>)) {
+            <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">error</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;This word is already in the set.&#39;</span>;
+            <span style="color:#66d9ef">return</span>;
+        }
+
+        <span style="color:#66d9ef">try</span> {
+            <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Traits</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>).<span style="color:#a6e22e">examine</span>([<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">word</span>]);
+        } <span style="color:#66d9ef">catch</span> (<span style="color:#a6e22e">err</span>) {
+            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">warn</span>(<span style="color:#e6db74">&#39;-- word parsing error:&#39;</span>, <span style="color:#a6e22e">err</span>);
+            <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">error</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Some of these characters are not allowed in a word.&#39;</span>;
+            <span style="color:#66d9ef">return</span>;
+        }
+
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">error</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>;
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">push</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">word</span>);
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">word</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>;
+
+        <span style="color:#75715e">// Refresh the generator.
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">gen</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Traits</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>).<span style="color:#a6e22e">generator</span>();
+    }
+
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * Drops a word from the source and refreshes the generator.
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">remove</span>(<span style="color:#a6e22e">word</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+        <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">index</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">indexOf</span>(<span style="color:#a6e22e">word</span>);
+        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">~</span><span style="color:#a6e22e">index</span>) <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">splice</span>(<span style="color:#a6e22e">index</span>, <span style="color:#ae81ff">1</span>);
+        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">length</span>) {
+            <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">reload</span>().<span style="color:#a6e22e">then</span>(() <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> {
+                <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">gen</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Traits</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>).<span style="color:#a6e22e">generator</span>();
+                <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">generate</span>();
+            });
+        } <span style="color:#66d9ef">else</span> {
+            <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">gen</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Traits</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>).<span style="color:#a6e22e">generator</span>();
+        }
+    }
+
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * Adds the given word to the source, removing it from the generated
+</span><span style="color:#75715e">     * results. Doesn&#39;t refresh the generator because adding a previously
+</span><span style="color:#75715e">     * generated word to the same source set has no effect on the total output.
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">pick</span>(<span style="color:#a6e22e">word</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">~</span><span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">indexOf</span>(<span style="color:#a6e22e">word</span>)) <span style="color:#66d9ef">return</span>;
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">words</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">word</span>);
+        <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">index</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">results</span>.<span style="color:#a6e22e">indexOf</span>(<span style="color:#a6e22e">word</span>);
+        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">~</span><span style="color:#a6e22e">index</span>) <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">results</span>.<span style="color:#a6e22e">splice</span>(<span style="color:#a6e22e">index</span>, <span style="color:#ae81ff">1</span>);
+    }
+}
+</pre></details>
+<p>Return to the page. You should see source words to the left and generated
+results to the right. Congratulations! You have written a working Angular 1.x
+application that takes advantage of ES6 and ES7 features, types, ES6 modules,
+and a truly universal package system. The best part? This is perfectly valid for
+production use.</p>
+<h2 id="production-builds"><span class="heading-prefix" aria-hidden="true"></span>Production Builds<a href="#production-builds" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Until now, we&rsquo;ve been importing JavaScript files over XHR. Now we&rsquo;ll take
+advantage of <code>jspm</code>&rsquo;s bundling feature to create a single self-executing
+JavaScript bundle, and add some HTML templating logic to include only that link
+when building for production.</p>
+
+<p>Modify your <code>src/html/index.html</code>:</p>
+<details class="details fancy-typography"><summary>src/html/index.html</summary><pre style="color:#f8f8f2;background-color:#272822"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span>&gt;
+    &lt;<span style="color:#f92672">head</span>&gt;
+        &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/ng-next-gen/css/stylific.css&#34;</span>&gt;
+        &lt;<span style="color:#f92672">base</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/ng-next-gen/&#34;</span>&gt;&lt;/<span style="color:#f92672">base</span>&gt;
+    &lt;/<span style="color:#f92672">head</span>&gt;
+    &lt;<span style="color:#f92672">body</span>&gt;
+        &lt;<span style="color:#f92672">sf-article</span>&gt;
+            &lt;<span style="color:#f92672">word-generator</span>&gt;&lt;/<span style="color:#f92672">word-generator</span>&gt;
+        &lt;/<span style="color:#f92672">sf-article</span>&gt;
+
+        <span style="color:#960050;background-color:#1e0010">&lt;</span>% if (prod()) { %&gt;
+            &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;build.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+        <span style="color:#960050;background-color:#1e0010">&lt;</span>% } else { %&gt;
+            &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;jspm_packages/es6-module-loader.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+            &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;jspm_packages/system.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+            &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;system.config.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+            &lt;<span style="color:#f92672">script</span>&gt;
+                <span style="color:#a6e22e">System</span>.<span style="color:#66d9ef">import</span>(<span style="color:#e6db74">&#39;boot&#39;</span>);
+            &lt;/<span style="color:#f92672">script</span>&gt;
+        <span style="color:#960050;background-color:#1e0010">&lt;</span>% } %&gt;
+    &lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</pre></details><pre style="color:#f8f8f2;background-color:#272822"><span style="color:#a6e22e">+ &lt;% if (prod()) { %&gt;
+</span><span style="color:#a6e22e"></span><span style="color:#a6e22e">+     &lt;script src=&#34;build.js&#34;&gt;&lt;/script&gt;
+</span><span style="color:#a6e22e"></span><span style="color:#a6e22e">+ &lt;% } else { %&gt;
+</span><span style="color:#a6e22e"></span>        &lt;script src=&#34;jspm_packages/es6-module-loader.js&#34;&gt;&lt;/script&gt;
+        &lt;script src=&#34;jspm_packages/system.js&#34;&gt;&lt;/script&gt;
+        &lt;script src=&#34;config.js&#34;&gt;&lt;/script&gt;
+        &lt;script&gt;
+            System.import(&#39;boot&#39;)
+        &lt;/script&gt;
+<span style="color:#a6e22e">+ &lt;% } %&gt;
+</span></pre>
+<p>Open <code>package.json</code>, find or create <code>&quot;scripts&quot;</code>, and add these lines:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#e6db74">&#34;scripts&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> {
+    <span style="color:#f92672">&#34;start&#34;</span>: <span style="color:#e6db74">&#34;gulp&#34;</span>,
+    <span style="color:#f92672">&#34;bundle&#34;</span>: <span style="color:#e6db74">&#34;jspm bundle-sfx boot --minify&#34;</span>,
+    <span style="color:#f92672">&#34;build-prod&#34;</span>: <span style="color:#e6db74">&#34;gulp build --prod &amp;&amp; npm run bundle&#34;</span>,
+    <span style="color:#f92672">&#34;serve-prod&#34;</span>: <span style="color:#e6db74">&#34;npm run build-prod &amp;&amp; gulp bsync&#34;</span>
+}
+</pre>
+<p>Now run:</p>
+<pre style="color:#f8f8f2;background-color:#272822">npm run serve-prod
+</pre>
+<p>You should see exactly the same application, but this time, all scripts are
+bundled and minified, with no external imports.</p>
+
+<p>The core magic here is <code>jspm bundle-sfx boot</code>, where <code>boot</code> is the name of the
+application module you&rsquo;re bundling. <code>jspm</code> collects this file and its entire
+dependency tree into a single file that behaves exactly like our multi-file
+setup in development mode.</p>
+
+<p>See the live demo deployed in &ldquo;prod mode&rdquo;: <a href="https://mitranim.com/ng-next-gen/" target="_blank" rel="noopener noreferrer">demo<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>.</p>
+
+<hr />
+
+<p>That&rsquo;s it! You can now build modern web applications using future technologies,
+with no drawbacks or compromises. Grab the complete demo on Github:
+<a href="https://github.com/mitranim/ng-next-gen" target="_blank" rel="noopener noreferrer">https://github.com/mitranim/ng-next-gen<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+and start playing around.</p>
+
+<p>If you have any questions, grab me over on <a href="https://gitter.im/Mitranim" target="_blank" rel="noopener noreferrer">Gitter<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+or <a href="skype:mitranim.web?chat">Skype</a>.</p>
+
+  </article>
+
+  <hr style="margin-top: auto" />
+
+  <div class="gaps-v-1">
+    <p>
+      This blog currently doesn't support comments.
+      Feel free to <a href="https://twitter.com/mitranim" target="_blank" rel="noopener noreferrer" class="decorate-link">tweet<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> at me,
+      email to <a href="mailto:me@mitranim.com?subject=Re:%20Next%20Generation%20Today">me@mitranim.com</a>,
+      or use the <a href="/#contacts">other contacts</a>.
+    </p>
+    <p class="inline-flex row-start-start gaps-h-0x5">
+  <span>Subscribe using one of:</span>
+  <a href="/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Atom<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="/feed_rss.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">RSS<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="https://feedly.com/i/subscription/feed/https://mitranim.com/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Feedly<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+</p>
+
+  </div>
+</div>
+</div>
+<footer style="margin-top: auto">
+  <div class="limit-width flex row-between-center margin-t-4 margin-b-2">
+    <span class="flex-1 flex row-start-start gaps-h-0x5">
+      <span class="text-left">2014—2020</span>
+      <a href="https://github.com/mitranim/mitranim.github.io" target="_blank" rel="noopener noreferrer" class="decorate-link">website source<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+    </span>
+
+    <span class="flex-1 text-center">
+      <a href="/#contacts" class="decorate-link">touch me</a>
+    </span>
+
+    <span class="flex-1 flex row-end-center gaps-h-0x5">
+      <a href="#top" class="fill-gray-fg-close padding-1 busy-bg-gray-close" onclick="event.preventDefault(); window.scrollTo(0, 0)" aria-label="scroll up">
+        <svg class="svg-icon fill-fg" viewBox="0 0 448 512" width="1em" height="1em"><path d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"/></svg>
+      </a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
+
+

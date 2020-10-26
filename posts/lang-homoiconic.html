@@ -1,0 +1,190 @@
+
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=2, initial-scale=1, user-scalable=yes" />
+  <link rel="icon" href="data:;base64,=" />
+  <link rel="stylesheet" type="text/css" href="/styles/main.css?3508717352" />
+
+  <title>Language Design: Homoiconicity</title>
+
+  <link rel="alternate" type="application/atom+xml" title="Mitranim's Posts (Atom)" href="/feed.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Mitranim's Posts (RSS)" href="/feed_rss.xml" />
+
+  <meta name="author" content="Nelo Mitranim" />
+  <meta property="og:title" content="Language Design: Homoiconicity" />
+  <meta name="description" content="Thoughts on homoiconicity, an interesting language quality seen in Lisps" />
+  
+  
+
+  
+</head>
+
+<body class="flex col-start-stretch relative" style="min-height: 100vh">
+  
+  <a href="#main-content" class="skip-to-content" onclick="event.preventDefault(); if (document.getElementById('main-content')) {document.getElementById('main-content').scrollIntoView()}">Skip to content</a>
+
+<div id="top" class="limit-width --unpadded flex row-start-stretch margin-b-2 gaps-h-1">
+  <nav class="flex row-start-stretch">
+    <a href="/"       class="navlink --busy">home</a>
+    <a href="/works"  class="navlink --busy">works</a>
+    <a href="/posts"  class="navlink --busy">posts</a>
+    <a href="/demos"  class="navlink --busy">demos</a>
+  </nav>
+
+  <span class="flex-1"></span>
+
+  <span class="fg-blue flex row-center-center padding-1 sm-hide">
+    Updated: Oct 26 2020
+  </span>
+</div>
+
+<div class="limit-width flex col-start-stretch flex-1">
+
+<div role="main" id="main-content" class="fancy-typography flex-1 flex col-start-stretch gaps-v-2">
+  <article role="article" class="fancy-typography">
+    
+    <h1><span class="heading-prefix" aria-hidden="true"></span>Language Design: Homoiconicity</h1>
+    <p role="doc-subtitle" class="font-large font-italic">Thoughts on homoiconicity, an interesting language quality seen in Lisps</p>
+    <p class="fg-gray-close font-small">published Oct 16 2020</p>
+    <p><strong>TLDR</strong>: Homoiconicity simplifies what was already trivial, while leading to poor design choices.</p>
+<h2 id="disclaimer"><span class="heading-prefix" aria-hidden="true"></span>Disclaimer<a href="#disclaimer" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>While this post is highly critical, it comes from a fan. I used Clojure for years, dabbled in other Lisps, wrote a few parsers and compilers. Even if this concept is not good language design, it&rsquo;s still pretty cool.</p>
+<h2 id="definition"><span class="heading-prefix" aria-hidden="true"></span>Definition<a href="#definition" class="heading-anchor" aria-hidden="true"></a></h2>
+<p><em>Homoiconicity</em> is when the entirety of a language&rsquo;s syntax matches the literal syntax of some of its data structures.</p>
+
+<p>This <strong>does not</strong> just mean that we can convert this text:</p>
+<pre style="color:#f8f8f2;background-color:#272822">(10 &#34;20&#34;)
+</pre>
+<p>Into some library-defined type:</p>
+<pre style="color:#f8f8f2;background-color:#272822">ast.LinkedList{ast.Number{&#34;10&#34;}, ast.String{&#34;20&#34;}}
+</pre>
+<p>This means <code>(10 &quot;20&quot;)</code> is the literal syntax for that AST type. In other words, the expression <code>(10 &quot;20&quot;)</code> gives your program a copy of the AST node that the parser generated for this expression when parsing that program. Sometimes with caveats:</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#75715e">; The quote tells the compiler: this list is not a function call.</span>
+<span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">10</span> <span style="color:#e6db74">&#34;20&#34;</span>)
+
+<span style="color:#75715e">; The quote tells the compiler: this symbol should not be evaluated.</span>
+<span style="color:#e6db74">&#39;ident</span>
+</pre>
+<p>This quality can simplify the language and macros (not by much). It requires the language to be dynamically typed, or have a dynamically typed subset.</p>
+<h2 id="defects"><span class="heading-prefix" aria-hidden="true"></span>Defects<a href="#defects" class="heading-anchor" aria-hidden="true"></a></h2>
+<ul>
+<li>Requires silly data types to be built in.</li>
+<li>Loses useful information.</li>
+</ul>
+<h3 id="symbols"><span class="heading-prefix" aria-hidden="true"></span>Symbols<a href="#symbols" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>Our language probably has identifiers: names for variables, functions, operators, and so on. To distinguish them from strings, we must introduce a new data type: &ldquo;symbol&rdquo;.</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#75715e">; This unquoted symbol is evaluated as a variable.</span>
+blah
+<span style="color:#75715e">; This quoted symbol is evaluated as data.</span>
+<span style="color:#e6db74">&#39;blah</span>
+<span style="color:#75715e">; Strings are considered distinct from symbols.</span>
+<span style="color:#e6db74">&#34;blah&#34;</span>
+</pre>
+<p>Setting macros aside, from the perspective of data modeling, having symbols is <em>bad</em>. They&rsquo;re just strings by another name, but everyone has to <em>choose</em> between symbols and strings. Library APIs will make different choices and conventions. Using external data formats gets more difficult, because they usually support only strings (see JSON).</p>
+
+<p>It gets crazier. Common Lisp and Clojure have <em>keywords</em>, which are symbols with minute differences and their own syntax. Everyone using those languages must spend time and effort choosing between strings, symbols, and keywords, dealing with idiosyncratic APIs, and dealing with conversions. I know I have.</p>
+
+<p>Side note: some languages with symbol-like data types support interning, which allows to compare them as integers. In dynamic languages, this can be a minor performance hack. Can also be a memory leak. Static languages don&rsquo;t need it. It&rsquo;s not worth it.</p>
+<h3 id="impossible-literals"><span class="heading-prefix" aria-hidden="true"></span>Impossible Literals<a href="#impossible-literals" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>We can probably agree that code auto-formatting is great. We can also probably agree that generating documentation from comments is simpler and more universal than special-case support for doc strings. But in any given homoiconic language, comments and whitespace are missing from the AST.</p>
+
+<p>We probably don&rsquo;t want to define a different AST and write a different parser. Which means our &ldquo;main&rdquo; AST generated by the parser must preserve comments and whitespace. Since all the other AST types are built-in, this requires built-in types for comments and whitespace. Internally, they would just be strings. Just like with symbols, we&rsquo;ve added more string-like types that should be limited to the AST, yet are built-in, easily available, and <em>will</em> be used where they shouldn&rsquo;t be. Or would be, unless&hellip;</p>
+
+<p>Homoiconicity seems to require that every data type in the AST is instantiated using the <em>exact same syntax</em> from which it was parsed. So, how do I assign literal whitespace to a variable? How do I assign a comment?</p>
+<pre style="color:#f8f8f2;background-color:#272822">(define whitespace
+
+(define comment   <span style="color:#75715e">; This doesn&#39;t get evaluated!</span>
+</pre><h3 id="information-loss"><span class="heading-prefix" aria-hidden="true"></span>Information Loss<a href="#information-loss" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>Comments and whitespace isn&rsquo;t the only information lost. Some data types might have N inputs for 1 output. One example is numbers:</p>
+<pre style="color:#f8f8f2;background-color:#272822">0b110011
+0x33
+51
+</pre>
+<p>All of these would be parsed into just <code>51</code>, losing the information about the original formatting. Even if we had preserved comments and whitespace in the AST, we can&rsquo;t print the original code back!</p>
+<h2 id="triviality"><span class="heading-prefix" aria-hidden="true"></span>Triviality<a href="#triviality" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>One decent upshot is that it simplifies macros. In Lisps, you can just quote a bit of code, return it from a macro, and it counts as valid AST:</p>
+<pre style="color:#f8f8f2;background-color:#272822">(defun sum (vals) (<span style="color:#a6e22e">reduce</span> <span style="color:#e6db74">&#39;+</span> vals))
+
+(defmacro trivial () <span style="color:#f92672">&#39;</span>(sum <span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">10</span> <span style="color:#ae81ff">20</span> <span style="color:#ae81ff">30</span>)))
+</pre>
+<p>All that&rsquo;s needed of macros is to return AST nodes. Programmatically manipulating an AST doesn&rsquo;t require special syntactic support. Calling <code>map</code> or <code>head</code>/<code>rest</code> on an AST doesn&rsquo;t care about its text representation. AST types could be defined somewhere in the standard library. Macros would import that module to use its types and functions. Non-trivial macros are already inscrutable, so we&rsquo;re not losing much readability.</p>
+<pre style="color:#f8f8f2;background-color:#272822">(<span style="color:#a6e22e">import</span> std:ast)
+
+(defmacro trivial ()
+  (ast:list
+    (ast:sym <span style="color:#e6db74">&#34;sum&#34;</span>)
+    (ast:quote (ast:list (ast:num <span style="color:#e6db74">&#34;10&#34;</span>) (ast:num <span style="color:#e6db74">&#34;20&#34;</span>) (ast:num <span style="color:#e6db74">&#34;30&#34;</span>)))))
+</pre>
+<p>But instead, the language could convert quoted code into types from the AST module. So we&rsquo;re back to:</p>
+<pre style="color:#f8f8f2;background-color:#272822">(defmacro trivial () <span style="color:#f92672">&#39;</span>(sum <span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">10</span> <span style="color:#ae81ff">20</span> <span style="color:#ae81ff">30</span>)))
+</pre>
+<p>What got simplified wasn&rsquo;t your code. It was the implementation of macro support in the language. Meanwhile, you got saddled with unnecessary data types and an inferior AST!</p>
+
+  </article>
+
+  <hr style="margin-top: auto" />
+
+  <div class="gaps-v-1">
+    <p>
+      This blog currently doesn't support comments.
+      Feel free to <a href="https://twitter.com/mitranim" target="_blank" rel="noopener noreferrer" class="decorate-link">tweet<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> at me,
+      email to <a href="mailto:me@mitranim.com?subject=Re:%20Language%20Design%3a%20Homoiconicity">me@mitranim.com</a>,
+      or use the <a href="/#contacts">other contacts</a>.
+    </p>
+    <p class="inline-flex row-start-start gaps-h-0x5">
+  <span>Subscribe using one of:</span>
+  <a href="/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Atom<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="/feed_rss.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">RSS<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="https://feedly.com/i/subscription/feed/https://mitranim.com/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Feedly<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+</p>
+
+  </div>
+</div>
+</div>
+<footer style="margin-top: auto">
+  <div class="limit-width flex row-between-center margin-t-4 margin-b-2">
+    <span class="flex-1 flex row-start-start gaps-h-0x5">
+      <span class="text-left">2014—2020</span>
+      <a href="https://github.com/mitranim/mitranim.github.io" target="_blank" rel="noopener noreferrer" class="decorate-link">website source<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+    </span>
+
+    <span class="flex-1 text-center">
+      <a href="/#contacts" class="decorate-link">touch me</a>
+    </span>
+
+    <span class="flex-1 flex row-end-center gaps-h-0x5">
+      <a href="#top" class="fill-gray-fg-close padding-1 busy-bg-gray-close" onclick="event.preventDefault(); window.scrollTo(0, 0)" aria-label="scroll up">
+        <svg class="svg-icon fill-fg" viewBox="0 0 448 512" width="1em" height="1em"><path d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"/></svg>
+      </a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
+
+

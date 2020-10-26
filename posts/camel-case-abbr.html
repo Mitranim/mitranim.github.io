@@ -1,0 +1,163 @@
+
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=2, initial-scale=1, user-scalable=yes" />
+  <link rel="icon" href="data:;base64,=" />
+  <link rel="stylesheet" type="text/css" href="/styles/main.css?3508717352" />
+
+  <title>Don&#39;t Abbreviate in CamelCase</title>
+
+  <link rel="alternate" type="application/atom+xml" title="Mitranim's Posts (Atom)" href="/feed.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Mitranim's Posts (RSS)" href="/feed_rss.xml" />
+
+  <meta name="author" content="Nelo Mitranim" />
+  <meta property="og:title" content="Don&#39;t Abbreviate in CamelCase" />
+  <meta name="description" content="CamelCase identifiers should avoid abbreviations, e.g. &#34;JsonText&#34; rather than &#34;JSONText&#34;" />
+  
+  
+
+  
+</head>
+
+<body class="flex col-start-stretch relative" style="min-height: 100vh">
+  
+  <a href="#main-content" class="skip-to-content" onclick="event.preventDefault(); if (document.getElementById('main-content')) {document.getElementById('main-content').scrollIntoView()}">Skip to content</a>
+
+<div id="top" class="limit-width --unpadded flex row-start-stretch margin-b-2 gaps-h-1">
+  <nav class="flex row-start-stretch">
+    <a href="/"       class="navlink --busy">home</a>
+    <a href="/works"  class="navlink --busy">works</a>
+    <a href="/posts"  class="navlink --busy">posts</a>
+    <a href="/demos"  class="navlink --busy">demos</a>
+  </nav>
+
+  <span class="flex-1"></span>
+
+  <span class="fg-blue flex row-center-center padding-1 sm-hide">
+    Updated: Oct 26 2020
+  </span>
+</div>
+
+<div class="limit-width flex col-start-stretch flex-1">
+
+<div role="main" id="main-content" class="fancy-typography flex-1 flex col-start-stretch gaps-v-2">
+  <article role="article" class="fancy-typography">
+    
+    <h1><span class="heading-prefix" aria-hidden="true"></span>Don&#39;t Abbreviate in CamelCase</h1>
+    <p role="doc-subtitle" class="font-large font-italic">CamelCase identifiers should avoid abbreviations, e.g. &#34;JsonText&#34; rather than &#34;JSONText&#34;</p>
+    <p class="fg-gray-close font-small">published Jan 17 2019</p>
+    <p><strong>Edit 2020-10-21</strong>: see the newer post <a href="/posts/lang-case-conventions">Language Design: Case Conventions</a>.</p>
+
+<p>Programming has the concept of an &ldquo;identifier&rdquo;. Identifiers are used for keywords, variable names, etc. Most languages restrict identifiers to Latin letters, digits, and an underscore.</p>
+
+<p>An identifier may consist of several words without spaces. The commonly used <a href="https://en.wikipedia.org/wiki/Letter_case" target="_blank" rel="noopener noreferrer">case styles<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> can distinguish individual words:</p>
+<pre style="color:#f8f8f2;background-color:#272822">oneTwo       -- lower camel case
+OneTwo       -- title camel case
+one_two      -- lower snake case
+ONE_TWO      -- upper snake case
+one-two      -- lower kebab case
+ONE-TWO      -- upper kebab case
+</pre>
+<p>All have at least two desirable properties: &ldquo;separability&rdquo; and &ldquo;consistency&rdquo;. Words must be separable; consistency ensures this rule is followed without exceptions.</p>
+
+<p>A problem peculiar to <code>TitleCamelCase</code> is how to treat abbreviations. Behold this monstrosity from JavaScript&rsquo;s DOM API:</p>
+<pre style="color:#f8f8f2;background-color:#272822">XMLHttpRequest
+</pre>
+<p>It&rsquo;s inconsistent: <code>XML</code> is spelled in capitals, while <code>HTTP</code> is spelled in title case, like a word. What gives? There were three ways to spell it out:</p>
+
+<ol>
+<li>Ignore abbreviations: <code>XmlHttpRequest</code></li>
+<li>Let them combine into one: <code>XMLHTTPRequest</code></li>
+<li>Use inconsistent casing: <code>XMLHttpRequest</code></li>
+</ol>
+
+<p>We see that (2) breaks separability while (3) breaks consistency. The general conclusion is that insisting on abbreviations leads to weird names, and is not compatible with the desirable properties of case styles.</p>
+
+<p>The only generally consistent approach is to ignore abbreviations, i.e. treat them as words:</p>
+<pre style="color:#f8f8f2;background-color:#272822">XmlHttpRequest
+</pre>
+<p>As a bonus, non-abbreviated <code>TitleCamelCase</code> is easier to automatically parse, convert to other cases, and reverse. Example:</p>
+<pre style="color:#f8f8f2;background-color:#272822">XmlHttpRequest -&gt; xml_http_request -&gt; XmlHttpRequest
+</pre>
+<p>For automatic tools, parsing inconsistent abbreviation is not impossible; for example, my Sublime Text <a href="https://github.com/mitranim/sublime-caser" target="_blank" rel="noopener noreferrer">plugin<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> for converting between cases can handle this. But there&rsquo;s just no good reason to make it harder.</p>
+
+<p>Finally, having just <em>one</em> choice means less thinking, which is good.</p>
+
+<p>That&rsquo;s all.</p>
+
+  </article>
+
+  <hr style="margin-top: auto" />
+
+  <div class="gaps-v-1">
+    <p>
+      This blog currently doesn't support comments.
+      Feel free to <a href="https://twitter.com/mitranim" target="_blank" rel="noopener noreferrer" class="decorate-link">tweet<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> at me,
+      email to <a href="mailto:me@mitranim.com?subject=Re:%20Don%27t%20Abbreviate%20in%20CamelCase">me@mitranim.com</a>,
+      or use the <a href="/#contacts">other contacts</a>.
+    </p>
+    <p class="inline-flex row-start-start gaps-h-0x5">
+  <span>Subscribe using one of:</span>
+  <a href="/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Atom<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="/feed_rss.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">RSS<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="https://feedly.com/i/subscription/feed/https://mitranim.com/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Feedly<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+</p>
+
+  </div>
+</div>
+</div>
+<footer style="margin-top: auto">
+  <div class="limit-width flex row-between-center margin-t-4 margin-b-2">
+    <span class="flex-1 flex row-start-start gaps-h-0x5">
+      <span class="text-left">2014—2020</span>
+      <a href="https://github.com/mitranim/mitranim.github.io" target="_blank" rel="noopener noreferrer" class="decorate-link">website source<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+    </span>
+
+    <span class="flex-1 text-center">
+      <a href="/#contacts" class="decorate-link">touch me</a>
+    </span>
+
+    <span class="flex-1 flex row-end-center gaps-h-0x5">
+      <a href="#top" class="fill-gray-fg-close padding-1 busy-bg-gray-close" onclick="event.preventDefault(); window.scrollTo(0, 0)" aria-label="scroll up">
+        <svg class="svg-icon fill-fg" viewBox="0 0 448 512" width="1em" height="1em"><path d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"/></svg>
+      </a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
+
+

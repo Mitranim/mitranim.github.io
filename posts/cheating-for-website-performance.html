@@ -1,0 +1,276 @@
+
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=2, initial-scale=1, user-scalable=yes" />
+  <link rel="icon" href="data:;base64,=" />
+  <link rel="stylesheet" type="text/css" href="/styles/main.css?3508717352" />
+
+  <title>Cheating for Website Performance</title>
+
+  <link rel="alternate" type="application/atom+xml" title="Mitranim's Posts (Atom)" href="/feed.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Mitranim's Posts (RSS)" href="/feed_rss.xml" />
+
+  <meta name="author" content="Nelo Mitranim" />
+  <meta property="og:title" content="Cheating for Website Performance" />
+  <meta name="description" content="Frontend tips for speeding up websites" />
+  
+  
+
+  
+</head>
+
+<body class="flex col-start-stretch relative" style="min-height: 100vh">
+  
+  <a href="#main-content" class="skip-to-content" onclick="event.preventDefault(); if (document.getElementById('main-content')) {document.getElementById('main-content').scrollIntoView()}">Skip to content</a>
+
+<div id="top" class="limit-width --unpadded flex row-start-stretch margin-b-2 gaps-h-1">
+  <nav class="flex row-start-stretch">
+    <a href="/"       class="navlink --busy">home</a>
+    <a href="/works"  class="navlink --busy">works</a>
+    <a href="/posts"  class="navlink --busy">posts</a>
+    <a href="/demos"  class="navlink --busy">demos</a>
+  </nav>
+
+  <span class="flex-1"></span>
+
+  <span class="fg-blue flex row-center-center padding-1 sm-hide">
+    Updated: Oct 26 2020
+  </span>
+</div>
+
+<div class="limit-width flex col-start-stretch flex-1">
+
+<div role="main" id="main-content" class="fancy-typography flex-1 flex col-start-stretch gaps-v-2">
+  <article role="article" class="fancy-typography">
+    
+    <h1><span class="heading-prefix" aria-hidden="true"></span>Cheating for Website Performance</h1>
+    <p role="doc-subtitle" class="font-large font-italic">Frontend tips for speeding up websites</p>
+    <p class="fg-gray-close font-small">published Mar 11 2015</p>
+    <p>Have been turning into a bit of a performance nut lately. This is what I&rsquo;ve
+found useful for speeding up websites. These are mostly frontend optimizations;
+I&rsquo;m not going to delve into server performance here.</p>
+<h2 id="table-of-contents"><span class="heading-prefix" aria-hidden="true"></span>Table of Contents<a href="#table-of-contents" class="heading-anchor" aria-hidden="true"></a></h2>
+<ul>
+<li><a href="#minify-everything"><span class="hash-prefix noprint" aria-hidden="true">#</span>Minify Everything</a></li>
+<li><a href="#concatenate-everything"><span class="hash-prefix noprint" aria-hidden="true">#</span>Concatenate Everything</a></li>
+<li><a href="#use-pjax"><span class="hash-prefix noprint" aria-hidden="true">#</span>Use Pjax</a></li>
+<li><a href="#use-server-rendering"><span class="hash-prefix noprint" aria-hidden="true">#</span>Use Server Rendering</a></li>
+<li><a href="#make-your-javascript-lazy"><span class="hash-prefix noprint" aria-hidden="true">#</span>Make Your JavaScript Lazy</a></li>
+<li><a href="#use-font-icons-or-inline-svg"><span class="hash-prefix noprint" aria-hidden="true">#</span>Use Font Icons or Inline SVG</a></li>
+<li><a href="#serve-static-assets"><span class="hash-prefix noprint" aria-hidden="true">#</span>Serve Static Assets</a></li>
+<li><a href="#reduce-latency"><span class="hash-prefix noprint" aria-hidden="true">#</span>Reduce Latency</a></li>
+<li><a href="#consider-a-static-website"><span class="hash-prefix noprint" aria-hidden="true">#</span>Consider a Static Website</a></li>
+</ul>
+<h2 id="minify-everything"><span class="heading-prefix" aria-hidden="true"></span>Minify Everything<a href="#minify-everything" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>By far the most important thing to optimize is images. There are great free tools like <a href="http://www.graphicsmagick.org" target="_blank" rel="noopener noreferrer">graphicsmagick<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> that let you automatically compress images without visible quality loss, rescale to different dimensions, crop, etc. They can be a <a href="https://github.com/scalableminds/gulp-image-resize" target="_blank" rel="noopener noreferrer">part<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> of your standard build chain, so there&rsquo;s absolutely no excuse for not using them. See <a href="https://github.com/mitranim/stylific/blob/master/gulpfile.js" target="_blank" rel="noopener noreferrer">example<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> (scroll down to image processing).</p>
+
+<p>Another important thing to compress is JavaScript. Modern JavaScript libraries
+(and hopefully your application&rsquo;s code) tend to be richly commented, bloating
+the source size, with the expectation of being minified for production use. With
+massive frameworks like Angular, React, or Polymer, the total size easily
+rockets past a megabyte. Minification gets it down to manageable size.</p>
+
+<p>Minifying CSS is usually less important, but like everything else, it&rsquo;s a
+useful optimization and there&rsquo;s no excuse for not doing it.</p>
+<h2 id="concatenate-everything"><span class="heading-prefix" aria-hidden="true"></span>Concatenate Everything<a href="#concatenate-everything" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Network latency is a huge deal. I can&rsquo;t stress this enough. Depending on the
+connectivity between your servers and your users, latency could range from 50ms
+to as much as a second.</p>
+
+<p>If you serve assets as multiple independent files, the browser has to make
+separate network requests for each. Browsers only download a few assets at a
+time, stalling other requests, which means any additional, say, stylesheets
+delay the <em>beginning</em> of loading for other assets like images or fonts. Even
+when everything is cached and elicits a 304 &ldquo;not modified&rdquo; response, the browser
+still has to wait longer before rendering the entirety of the page.</p>
+
+<p>That&rsquo;s bad. To avoid that, make sure to concatenate assets used on each page,
+like stylesheets, scripts, and icons (see below on that).</p>
+<h2 id="use-pjax"><span class="heading-prefix" aria-hidden="true"></span>Use Pjax<a href="#use-pjax" class="heading-anchor" aria-hidden="true"></a></h2>
+<p><strong>Update</strong>: see this <a href="/posts/cheating-for-performance-pjax">in-depth post</a> on pjax.</p>
+
+<p>Pjax is a cheap trick that combines <code>history.pushState</code> and <code>ajax</code> to mimic page
+transitions without actually reloading the page.</p>
+
+<p>The basic idea is dead simple and can be implemented in a few lines of code.
+Attach a document-level event listener to intercept clicks on <code>&lt;a&gt;</code> elements. If
+the clicked link leads to an internal page, fetch the page by ajax, replace the
+contents of the current page, and replace the URL using <code>pushState</code>. For
+browsers that don&rsquo;t support this API, you simply fall back to normal page
+transitions.</p>
+
+<p>Despite the simplicity, the benefits are stunning. It gives you most of the
+advantages enjoyed by SPA (single page applications). The browser gets to keep
+the same JavaScript runtime and all downloaded assets, including images, fonts,
+stylesheets, etc. This dramatically improves page load times, particularly on
+poor connections such as mobile networks. This also lets you maintain a
+persistent WebSocket connection while the user navigates your server-rendered
+multi-page app!</p>
+
+<p>There are a few <a href="https://github.com/defunkt/jquery-pjax" target="_blank" rel="noopener noreferrer">implementations<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> in the wild, but they require clientside <em>and</em> server-side configuration. If you&rsquo;re like me, this will seem like a waste of time. The biggest benefit of pjax is keeping the browsing session. Micromanaging partial templates is probably not worth your time, but everyone&rsquo;s needs are different.</p>
+
+<p>I wrote a <a href="https://github.com/mitranim/simple-pjax" target="_blank" rel="noopener noreferrer">simple pjax library<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> that works with zero config. Check the <a href="https://github.com/mitranim/simple-pjax#gotchas" target="_blank" rel="noopener noreferrer">gotchas<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> to see if it&rsquo;s usable for your site, then give it a spin or roll your own! The library is also used on this very site. Inspect the network console to observe the effects.</p>
+<h2 id="use-server-rendering"><span class="heading-prefix" aria-hidden="true"></span>Use Server Rendering<a href="#use-server-rendering" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>There&rsquo;s a trend towards single page applications (SPA) with clientside routing
+and rendering. They tend to skip server-side rendering in favor of being
+data-driven, usually through a RESTful API. As a result, they tend to have slow
+initial page loads. This is bad, particularly on slow connections, which is
+typical for mobile.</p>
+
+<p>Practice has shown that for consumer-facing websites, initial load time matters.
+On top of that, lack of prerendering costs you SEO. Don&rsquo;t fall into this trap;
+server rendering is a sacrifice you don&rsquo;t have to make. Some JavaScript UI
+libraries, like React, already support isomorphic routing and rendering, and
+other frameworks, like Angular 2 and Ember, are planning to support it. Make
+sure to research this feature for your stack of choice.</p>
+<h2 id="make-your-javascript-lazy"><span class="heading-prefix" aria-hidden="true"></span>Make Your JavaScript Lazy<a href="#make-your-javascript-lazy" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>If your application is JavaScript-heavy, you should use a module system with lazy loading. This is supported by the ES6 module system, and you can use it today with <a href="https://github.com/systemjs/systemjs" target="_blank" rel="noopener noreferrer">SystemJS<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> and, optionally, <a href="https://jspm.io" target="_blank" rel="noopener noreferrer">jspm<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>. You can also achieve a similar effect with AMD.</p>
+
+<p>The core parts of the application should be bundled into a single file, and big but optional parts may be imported asynchronously when needed. If your app is small, you can skip lazy loading and bundle the entire app.</p>
+<h2 id="use-font-icons-or-inline-svg"><span class="heading-prefix" aria-hidden="true"></span>Use Font Icons or Inline SVG<a href="#use-font-icons-or-inline-svg" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Most sites need icons. In the past, we had to use raster images. However, in the
+days of widespread retina displays, <code>@font-face</code>, and SVG, that&rsquo;s a poor option.
+Hopefully you have switched to the vector alternatives: icon fonts and SVG
+icons. They scale to any display sharpness and are easy to style with CSS.</p>
+
+<p>SVGs can be embedded into the document or base64-encoded directly into your CSS,
+eliminating icon flicker on page load. They can also be directly manipulated
+with JavaScript for cool visual effects. On the other hand, icon fonts are
+easier to set up and use, and cost less bandwidth than embedded SVGs. For most
+sites, a mix of both solutions will probably be optimal.</p>
+<h2 id="serve-static-assets"><span class="heading-prefix" aria-hidden="true"></span>Serve Static Assets<a href="#serve-static-assets" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>This goes without saying, but you should double check to make sure your server
+is properly configured for static files like images, stylesheets, and scripts.
+It should include headers that tell the browser to cache the file, and respond
+with 304 for unchanged assets. This eliminates a lot of redownloading, reducing
+latency+download time to latency+0.</p>
+<h2 id="reduce-latency"><span class="heading-prefix" aria-hidden="true"></span>Reduce Latency<a href="#reduce-latency" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Network latency is a huge deal. It&rsquo;s a part of each request made by the browser,
+even for static assets with 304 responses. The browser blocks page rendering
+while downloading the document and anything included in <code>&lt;head&gt;</code>, which defines
+how snappy or sluggish your site feels. The browser may also wait for the first
+few images (Firefox seems to have this tendency), or it may choose to render the
+page and later flicker them into view, and latency determines how quickly this
+happens.</p>
+
+<p>On many sites, the document is rendered dynamically and involves database
+access. This absolutely needs to be fast, but this work is usually done once per
+page load. The rest comes from network latency for the document and assets. Make
+sure to use a web hosting with low latency times for your target audience. If
+your audience is all over the world, pick a server with good average latency and
+use a caching proxy / CDN like CloudFlare to reduce latency for static content.</p>
+<h2 id="consider-a-static-website"><span class="heading-prefix" aria-hidden="true"></span>Consider a Static Website<a href="#consider-a-static-website" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Simple websites with one maintainer, like a personal page or a blog, don&rsquo;t need a scripting engine with a database. You can prerender them into HTML files, then serve with nginx or on a service like Github Pages. Dynamic functionality can be implemented with ajax.</p>
+
+<p>Serving static files is naturally more performant than rendering templates on each request. They&rsquo;re also automatically subject to caching. When the base document is cached, some browsers may serve the entire page, including assets, from the cache, rendering it with zero latency.</p>
+
+<p>Static site generators are <a href="https://www.staticgen.com" target="_blank" rel="noopener noreferrer">plentiful<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>, and if they don&rsquo;t float your boat, you can write your <a href="https://github.com/mitranim/mitranim.github.io" target="_blank" rel="noopener noreferrer">own<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> in an afternoon.</p>
+
+  </article>
+
+  <hr style="margin-top: auto" />
+
+  <div class="gaps-v-1">
+    <p>
+      This blog currently doesn't support comments.
+      Feel free to <a href="https://twitter.com/mitranim" target="_blank" rel="noopener noreferrer" class="decorate-link">tweet<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> at me,
+      email to <a href="mailto:me@mitranim.com?subject=Re:%20Cheating%20for%20Website%20Performance">me@mitranim.com</a>,
+      or use the <a href="/#contacts">other contacts</a>.
+    </p>
+    <p class="inline-flex row-start-start gaps-h-0x5">
+  <span>Subscribe using one of:</span>
+  <a href="/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Atom<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="/feed_rss.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">RSS<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="https://feedly.com/i/subscription/feed/https://mitranim.com/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Feedly<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+</p>
+
+  </div>
+</div>
+</div>
+<footer style="margin-top: auto">
+  <div class="limit-width flex row-between-center margin-t-4 margin-b-2">
+    <span class="flex-1 flex row-start-start gaps-h-0x5">
+      <span class="text-left">2014—2020</span>
+      <a href="https://github.com/mitranim/mitranim.github.io" target="_blank" rel="noopener noreferrer" class="decorate-link">website source<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+    </span>
+
+    <span class="flex-1 text-center">
+      <a href="/#contacts" class="decorate-link">touch me</a>
+    </span>
+
+    <span class="flex-1 flex row-end-center gaps-h-0x5">
+      <a href="#top" class="fill-gray-fg-close padding-1 busy-bg-gray-close" onclick="event.preventDefault(); window.scrollTo(0, 0)" aria-label="scroll up">
+        <svg class="svg-icon fill-fg" viewBox="0 0 448 512" width="1em" height="1em"><path d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"/></svg>
+      </a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
+
+

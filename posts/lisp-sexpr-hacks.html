@@ -1,0 +1,229 @@
+
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=2, initial-scale=1, user-scalable=yes" />
+  <link rel="icon" href="data:;base64,=" />
+  <link rel="stylesheet" type="text/css" href="/styles/main.css?3508717352" />
+
+  <title>Hacks around S-expressions in Lisps</title>
+
+  <link rel="alternate" type="application/atom+xml" title="Mitranim's Posts (Atom)" href="/feed.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Mitranim's Posts (RSS)" href="/feed_rss.xml" />
+
+  <meta name="author" content="Nelo Mitranim" />
+  <meta property="og:title" content="Hacks around S-expressions in Lisps" />
+  <meta name="description" content="How far people are willing to go to get prefix and infix in a Lisp syntax" />
+  
+  
+
+  
+</head>
+
+<body class="flex col-start-stretch relative" style="min-height: 100vh">
+  
+  <a href="#main-content" class="skip-to-content" onclick="event.preventDefault(); if (document.getElementById('main-content')) {document.getElementById('main-content').scrollIntoView()}">Skip to content</a>
+
+<div id="top" class="limit-width --unpadded flex row-start-stretch margin-b-2 gaps-h-1">
+  <nav class="flex row-start-stretch">
+    <a href="/"       class="navlink --busy">home</a>
+    <a href="/works"  class="navlink --busy">works</a>
+    <a href="/posts"  class="navlink --busy">posts</a>
+    <a href="/demos"  class="navlink --busy">demos</a>
+  </nav>
+
+  <span class="flex-1"></span>
+
+  <span class="fg-blue flex row-center-center padding-1 sm-hide">
+    Updated: Oct 26 2020
+  </span>
+</div>
+
+<div class="limit-width flex col-start-stretch flex-1">
+
+<div role="main" id="main-content" class="fancy-typography flex-1 flex col-start-stretch gaps-v-2">
+  <article role="article" class="fancy-typography">
+    
+    <h1><span class="heading-prefix" aria-hidden="true"></span>Hacks around S-expressions in Lisps</h1>
+    <p role="doc-subtitle" class="font-large font-italic">How far people are willing to go to get prefix and infix in a Lisp syntax</p>
+    <p class="fg-gray-close font-small">published Oct 21 2020</p>
+    <p><strong>TLDR</strong>: nobody wants to write pure S-expressions, and Lisps are full of hacks around them.</p>
+
+<p>Disclaimer: Lisps have decades of history and many dialects with a variety of hacks. The following is just what I happened to come across. There might be more.</p>
+
+<p>Examples on this page use <a href="https://racket-lang.org" target="_blank" rel="noopener noreferrer">Racket<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>.</p>
+<h2 id="definitions"><span class="heading-prefix" aria-hidden="true"></span>Definitions<a href="#definitions" class="heading-anchor" aria-hidden="true"></a></h2>
+<p><a href="https://en.wikipedia.org/wiki/S-expression" target="_blank" rel="noopener noreferrer">S-expressions<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> is a syntax for binary trees. The base notation has only atoms, pairs, and nil:</p>
+<pre style="color:#f8f8f2;background-color:#272822">symbol       |    atom
+&#34;string&#34;     |    atom
+10           |    atom
+(10 . 20)    |    pair
+()           |    nil
+</pre>
+<p>We could express pairs as <code>(a b)</code> without <code>.</code>, but at the cost of the &ldquo;abbreviated&rdquo; notation. The abbreviated notation allows to drop <code>.</code> as a shortcut for pairs that end with another pair or nil:</p>
+<pre style="color:#f8f8f2;background-color:#272822">(10)            -&gt;    (10 . ())
+(10 20)         -&gt;    (10 . (20 . ()))
+(10 20 30)      -&gt;    (10 . (20 . (30 . ())))
+(10 20 . 30)    -&gt;    (10 . (20 . 30))
+</pre>
+<p>When talking about S-expressions as code, we usually mean the abbreviated notation, as in Lisps. Writing code in the base notation is out of the question, but pairs will come back to haunt us later.</p>
+<pre style="color:#f8f8f2;background-color:#272822">(<span style="color:#66d9ef">define</span> add (<span style="color:#66d9ef">lambda</span> (a b) (+ a b)))
+
+(<span style="color:#66d9ef">define</span> some_var (add <span style="color:#ae81ff">10</span> <span style="color:#ae81ff">20</span>))<span style="color:#960050;background-color:#1e0010">
+</span></pre><h2 id="why"><span class="heading-prefix" aria-hidden="true"></span>Why<a href="#why" class="heading-anchor" aria-hidden="true"></a></h2>
+<ul>
+<li>Extremely simple.</li>
+<li>Can express any computation.</li>
+<li>Infinitely extensible.</li>
+</ul>
+
+<p>We can express new concepts by adding meaning to symbols such as <code>lambda</code>, <code>if</code>, and so on. Each such &ldquo;form&rdquo; will have its internal &ldquo;syntax&rdquo;, usually extremely simple, but we don&rsquo;t have to change the base notation. The cost of adding and learning new features is lower compared to other syntaxes. This also makes it easy to give <em>users</em> the ability to extend it, via AST-based macros.</p>
+
+<p>Sidenote. Personally I like S-expressions as <em>syntax</em>, but advocate against dynamic typing and <a href="/posts/lang-homoiconic">homoiconity</a>. Instead, we could use S-expressions for statically typed languages.</p>
+<h2 id="hacks"><span class="heading-prefix" aria-hidden="true"></span>Hacks<a href="#hacks" class="heading-anchor" aria-hidden="true"></a></h2><h3 id="number-literals"><span class="heading-prefix" aria-hidden="true"></span>Number Literals<a href="#number-literals" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>S-expressions require unary negation to be written like this:</p>
+<pre style="color:#f8f8f2;background-color:#272822">(- num)
+(- 10)
+</pre>
+<p>But <code>-10</code> was too hard to give up, so they built <code>+-</code> <em>into number literals</em>. The language&rsquo;s parser supports <code>+10</code> <code>-10</code> where the operator is part of the number&rsquo;s syntax. Note that <code>+ 10</code> <code>- 10</code> (with a space) don&rsquo;t work that way. Needless to say, this special case doesn&rsquo;t extend to other unary operators such as bitwise negation.</p>
+<h3 id="prefix-operators"><span class="heading-prefix" aria-hidden="true"></span>Prefix Operators<a href="#prefix-operators" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>Despite claiming the opposite, Lisps have always had many prefix operators, not just <code>-10</code>.</p>
+
+<p>Lisps have a concept of &ldquo;quoting&rdquo; code. Because the code notation <em>happens</em> to be a data notation, the quoted code can be evaluated as data. This also serves as the language&rsquo;s AST, used internally.</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#75715e">; Evaluate as code, result is `30`</span>
+(add <span style="color:#ae81ff">10</span> <span style="color:#ae81ff">20</span>)
+
+<span style="color:#75715e">; Evaluate as data, result is `(add 10 20)`</span>
+(<span style="color:#66d9ef">quote</span> (<span style="color:#e6db74">add</span> <span style="color:#ae81ff">10</span> <span style="color:#ae81ff">20</span>))<span style="color:#960050;background-color:#1e0010">
+</span></pre>
+<p>Writing <code>(quote)</code> and others was too much, so they added prefix shortcuts.</p>
+<pre style="color:#f8f8f2;background-color:#272822"><span style="color:#f92672">&#39;</span>(<span style="color:#e6db74">add</span> <span style="color:#ae81ff">10</span> <span style="color:#ae81ff">20</span>)       <span style="color:#66d9ef">-&gt;</span>    (<span style="color:#66d9ef">quote</span> (<span style="color:#e6db74">add</span> <span style="color:#ae81ff">10</span> <span style="color:#ae81ff">20</span>))
+<span style="color:#f92672">`</span>(<span style="color:#e6db74">add</span> <span style="color:#ae81ff">10</span> <span style="color:#ae81ff">20</span>)       <span style="color:#66d9ef">-&gt;</span>    (<span style="color:#66d9ef">quasiquote</span> (<span style="color:#e6db74">add</span> <span style="color:#ae81ff">10</span> <span style="color:#ae81ff">20</span>))
+<span style="color:#f92672">`</span>(<span style="color:#e6db74">add</span> <span style="color:#ae81ff">10</span> <span style="color:#f92672">,</span>expr)    <span style="color:#66d9ef">-&gt;</span>    (<span style="color:#66d9ef">quasiquote</span> (<span style="color:#e6db74">add</span> <span style="color:#ae81ff">10</span> (<span style="color:#66d9ef">unquote</span> expr)))
+<span style="color:#f92672">`</span>(<span style="color:#e6db74">add</span> <span style="color:#f92672">,@</span>exprs)     <span style="color:#66d9ef">-&gt;</span>    (<span style="color:#66d9ef">quasiquote</span> (<span style="color:#e6db74">add</span> (<span style="color:#66d9ef">unquote-splicing</span> exprs)))<span style="color:#960050;background-color:#1e0010">
+</span></pre>
+<p>In general, Lisp prefix operators are aliases for other forms. They&rsquo;re converted after or during parsing text into AST. Parsing text and converting prefix operators is combined into a step called &ldquo;reading&rdquo;, which returns a canonical AST.</p>
+
+<p><a href="https://clojure.org/reference/reader" target="_blank" rel="noopener noreferrer">Clojure&rsquo;s reader<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> has more prefix operators, such as <code>@A</code> → <code>(deref A)</code>, and a somewhat-generalized <code>#</code>.</p>
+
+<p>Upside: because this is done once at &ldquo;read time&rdquo;, no other code has to deal with prefix operators. Downside: standard library and user code either can&rsquo;t define new prefix operators, or must use an API different from functions and macros.</p>
+<h3 id="curly-infix"><span class="heading-prefix" aria-hidden="true"></span>Curly Infix<a href="#curly-infix" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>People have written large documents and reference implementations suggesting <code>{}</code> for infix. See <a href="https://srfi.schemers.org/srfi-105/srfi-105.html" target="_blank" rel="noopener noreferrer">SRFI 105<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>. Code inside <code>{}</code> would be implicitly and unambiguously converted to the canonical form by the reader.</p>
+<pre style="color:#f8f8f2;background-color:#272822">{10 + 20 + 30}      -&gt;    (+ 10 20 30)
+{{10 + 20} * 30}    -&gt;    (* (+ 10 20) 30)
+</pre>
+<p>Veiled in-joke or serious request? Can&rsquo;t tell&hellip;</p>
+
+<p>It can be observed that this proposal has no precedence, only grouping. Grouping is both necessary and sufficient. Precedence is not necessary and not sufficient. Programming languages have lots of operators that don&rsquo;t exist in math, and their precedence is inconsistent between languages. Precedence errors are so insidious that some languages, like Pony, ban most forms of operator mixing and enforce grouping. This proposal, while ludicrous in the context of Lisp, has at least one good idea at its core.</p>
+<h3 id="racket-infix-hack"><span class="heading-prefix" aria-hidden="true"></span>Racket Infix Hack<a href="#racket-infix-hack" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>Racket has a special infix hack.</p>
+
+<p>Remember the unabbreviated <code>(a . b)</code> syntax for pairs? Racket folks have found unused &ldquo;dead space&rdquo; in the syntax they could exploit. In addition to binary <code>(a . b)</code> which makes a <em>pair</em>, it supports ternary <code>(a . b . c)</code> which makes a <em>reordered list</em>. They use <em>one</em> infix operator to enable <em>other</em> infix operators or functions in a &ldquo;general&rdquo; way.</p>
+<pre style="color:#f8f8f2;background-color:#272822">(10 . + . 20)               -&gt;    (+ 10 20)
+((10 . + . 20) . * . 30)    -&gt;    (* (+ 10 20) 30)
+</pre>
+<p>It&rsquo;s often said that forbidden fruit is desired more strongly. Evidence suggests that when Lisp bereaves its users of infix, they develop a strong desire for more, <em>more</em> infix! (We herd you like infix, so we put more infix in your infix&hellip;)</p>
+<h3 id="namespacing-in-symbols"><span class="heading-prefix" aria-hidden="true"></span>Namespacing in Symbols<a href="#namespacing-in-symbols" class="heading-anchor" aria-hidden="true"></a></h3>
+<p>Most languages have some form of namespacing. Some mix several forms.</p>
+<pre style="color:#f8f8f2;background-color:#272822">one.two.three
+one-&gt;two-&gt;three
+one:two:three
+one::two::three
+one/two.three
+</pre>
+<p>Since inception, Lisps have allowed special characters inside symbols, and avoided infix operators. It naturally followed that Lisp package systems implement namespacing inside symbols. Common Lisp and Racket use <code>:</code>, Clojure uses <code>/</code> and <code>.</code>.</p>
+<pre style="color:#f8f8f2;background-color:#272822">package:identifier
+namespace/identifier
+value.method
+</pre>
+<p>Still a hack, because <em>useful</em> applications of these symbols involve sub-parsing them. Conceptually, these are separate identifiers combined by an infix operator. The parser (or &ldquo;reader&rdquo;) should have parsed them for you, storing the pieces in the AST. That&rsquo;s what Clojure does: its symbols are classes with separate &ldquo;namespace&rdquo; and &ldquo;name&rdquo; parts. This indicates that they were combined prematurely.</p>
+
+<p>Sidenote. One simple alternative is to extend &ldquo;reader macros&rdquo; by supporting infix <code>:</code>, converting <code>one:two:three</code> to canonical <code>:(one two three)</code>. Lisps already special-case <code>.</code> in a similar way; <code>:</code> would have a higher precedence. As long as there&rsquo;s no other infix, this should parse unambiguously. Alternatively, we could ditch the pair syntax and use <code>.</code> for namespacing. Improper pairs could be printed as <code>(cons a b)</code>.</p>
+
+<p>The major downside of the solution above, aside from added complexity, is that it&rsquo;s non-extensible, as adding more infix would create parsing ambiguities, which we can&rsquo;t resolve because we can&rsquo;t afford <code>()</code> for grouping. I would appreciate a simple and flexible approach that doesn&rsquo;t seem hacky.</p>
+<h2 id="conclusion"><span class="heading-prefix" aria-hidden="true"></span>Conclusion<a href="#conclusion" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>If Lisp people didn&rsquo;t stick with pure S-expressions, nobody will. Languages designed for practical use must include common prefix and infix shortcuts. To me, everything above seems hacky or complicated. Elegant approaches are topics for other posts.</p>
+
+  </article>
+
+  <hr style="margin-top: auto" />
+
+  <div class="gaps-v-1">
+    <p>
+      This blog currently doesn't support comments.
+      Feel free to <a href="https://twitter.com/mitranim" target="_blank" rel="noopener noreferrer" class="decorate-link">tweet<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> at me,
+      email to <a href="mailto:me@mitranim.com?subject=Re:%20Hacks%20around%20S-expressions%20in%20Lisps">me@mitranim.com</a>,
+      or use the <a href="/#contacts">other contacts</a>.
+    </p>
+    <p class="inline-flex row-start-start gaps-h-0x5">
+  <span>Subscribe using one of:</span>
+  <a href="/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Atom<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="/feed_rss.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">RSS<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="https://feedly.com/i/subscription/feed/https://mitranim.com/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Feedly<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+</p>
+
+  </div>
+</div>
+</div>
+<footer style="margin-top: auto">
+  <div class="limit-width flex row-between-center margin-t-4 margin-b-2">
+    <span class="flex-1 flex row-start-start gaps-h-0x5">
+      <span class="text-left">2014—2020</span>
+      <a href="https://github.com/mitranim/mitranim.github.io" target="_blank" rel="noopener noreferrer" class="decorate-link">website source<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+    </span>
+
+    <span class="flex-1 text-center">
+      <a href="/#contacts" class="decorate-link">touch me</a>
+    </span>
+
+    <span class="flex-1 flex row-end-center gaps-h-0x5">
+      <a href="#top" class="fill-gray-fg-close padding-1 busy-bg-gray-close" onclick="event.preventDefault(); window.scrollTo(0, 0)" aria-label="scroll up">
+        <svg class="svg-icon fill-fg" viewBox="0 0 448 512" width="1em" height="1em"><path d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"/></svg>
+      </a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
+
+

@@ -1,0 +1,252 @@
+
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=2, initial-scale=1, user-scalable=yes" />
+  <link rel="icon" href="data:;base64,=" />
+  <link rel="stylesheet" type="text/css" href="/styles/main.css?3508717352" />
+
+  <title>Cheating for Performance with Pjax</title>
+
+  <link rel="alternate" type="application/atom+xml" title="Mitranim's Posts (Atom)" href="/feed.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Mitranim's Posts (RSS)" href="/feed_rss.xml" />
+
+  <meta name="author" content="Nelo Mitranim" />
+  <meta property="og:title" content="Cheating for Performance with Pjax" />
+  <meta name="description" content="Faster page transitions, for free" />
+  
+  
+
+  
+</head>
+
+<body class="flex col-start-stretch relative" style="min-height: 100vh">
+  
+  <a href="#main-content" class="skip-to-content" onclick="event.preventDefault(); if (document.getElementById('main-content')) {document.getElementById('main-content').scrollIntoView()}">Skip to content</a>
+
+<div id="top" class="limit-width --unpadded flex row-start-stretch margin-b-2 gaps-h-1">
+  <nav class="flex row-start-stretch">
+    <a href="/"       class="navlink --busy">home</a>
+    <a href="/works"  class="navlink --busy">works</a>
+    <a href="/posts"  class="navlink --busy">posts</a>
+    <a href="/demos"  class="navlink --busy">demos</a>
+  </nav>
+
+  <span class="flex-1"></span>
+
+  <span class="fg-blue flex row-center-center padding-1 sm-hide">
+    Updated: Oct 26 2020
+  </span>
+</div>
+
+<div class="limit-width flex col-start-stretch flex-1">
+
+<div role="main" id="main-content" class="fancy-typography flex-1 flex col-start-stretch gaps-v-2">
+  <article role="article" class="fancy-typography">
+    
+    <h1><span class="heading-prefix" aria-hidden="true"></span>Cheating for Performance with Pjax</h1>
+    <p role="doc-subtitle" class="font-large font-italic">Faster page transitions, for free</p>
+    <p class="fg-gray-close font-small">published Jul 25 2015</p>
+    <h2 id="overview"><span class="heading-prefix" aria-hidden="true"></span>Overview<a href="#overview" class="heading-anchor" aria-hidden="true"></a></h2><p>Optimizing website performance is tricky. There&rsquo;s plenty of articles delving deep into technical detail, like <a href="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/analyzing-crp?hl=en" target="_blank" rel="noopener noreferrer">this great guide<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> by Google. Naturally, when you make it that hard, most people aren&rsquo;t going to bother.</p>
+
+<p>What if I told you there&rsquo;s a way to dramatically speed up page transitions just by adding a library? With zero or few code changes? And it&rsquo;s overlooked by the contemporary blogosphere?</p>
+
+<p class="font-large">
+    <span>Demo time!</span>
+    <a href="https://mitranim.com/simple-pjax/" target="_blank" rel="noopener noreferrer" class="decorate-link">https://mitranim.com/simple-pjax/<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+</p>
+
+<p>Who benefits from this?</p>
+
+<ul class="unstyled-list">
+    <li><span class="fg-blue">✓</span> typical server-rendered sites</li>
+    <li><span class="fg-blue">✓</span> statically generated sites</li>
+    <li><span class="fg-red">✕</span> but not SPA (they already enjoy clientside routing)</li>
+</ul>
+
+<p>As you might have guessed, we&rsquo;re going to exploit clientside routing with <code>history.pushState</code>. It&rsquo;s usually considered a domain of client-rendered SPA, but what a mistake that is!</p>
+
+<p>When you think about it, the status quo of content delivery on the web is <em>insane</em>. We&rsquo;re forcing visitors to make dozens of network connections and execute massive amounts of JavaScript on <em>each page load</em> on the same site.</p>
+
+<p class="font-large">👎 Typical page transition</p>
+
+<ol>
+    <li>Link clicked</li>
+
+    <ul class="unstyled-list">
+        <li>✅ download new document
+        <li>💀 throw away JS runtime
+        <li>💀 throw away websocket connections
+        <li>💩 304 requests for stylesheets, scripts, old images, fonts</li>
+        <li>✅ download new images if needed</li>
+    </ul>
+
+    <li>More work!</li>
+    <ul class="unstyled-list">
+        <li>💀 create new JS runtime</li>
+        <li>💀 rerun all scripts</li>
+        <li>🎂 display new document, with images and fonts flickering in</li>
+        <li>💀 negotiate new websocket connections</li>
+    </ul>
+</ol>
+
+<p>With pushstate routing, we can do better.</p>
+
+<p class="font-large">👍 Page transition with pjax</p>
+
+<ol>
+    <li>Link clicked</li>
+
+    <ul class="unstyled-list">
+        <li>✅ download new document</li>
+        <li>✅ download new images if needed</li>
+    </ul>
+
+    <li>🎂 display new document 🎉</li>
+</ol>
+<h2 id="implementation"><span class="heading-prefix" aria-hidden="true"></span>Implementation<a href="#implementation" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>The idea is dead simple. Say a user navigates from page A to page B on your site. Instead of a full page reload, fetch B by ajax, replace A, and update the URL using <code>history.pushState</code>. This technique has been termed <em><code>pjax</code></em>.</p>
+
+<p>Here&rsquo;s a super naive example to illustrate the point. (DON&rsquo;T COPY THIS, SEE BELOW)</p>
+<pre style="color:#f8f8f2;background-color:#272822">document.<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;click&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">event</span>) {
+    <span style="color:#75715e">// Find a clicked &lt;a&gt;, if any.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">anchor</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">target</span>
+    <span style="color:#66d9ef">do</span> {
+        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">anchor</span> <span style="color:#66d9ef">instanceof</span> <span style="color:#a6e22e">HTMLAnchorElement</span>) <span style="color:#66d9ef">break</span>
+    } <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">anchor</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">anchor</span>.<span style="color:#a6e22e">parentElement</span>)
+    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">anchor</span>) <span style="color:#66d9ef">return</span>
+
+    <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">preventDefault</span>()
+
+    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">xhr</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">XMLHttpRequest</span>()
+
+    <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">onload</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>() {
+        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">status</span> <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">200</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">status</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">299</span>) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">onerror</span>()
+        <span style="color:#75715e">// Update the URL to match the clicked link.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">history</span>.<span style="color:#a6e22e">pushState</span>(<span style="color:#66d9ef">null</span>, <span style="color:#e6db74">&#39;&#39;</span>, <span style="color:#a6e22e">anchor</span>.<span style="color:#a6e22e">href</span>)
+        <span style="color:#75715e">// Replace the old document with the new content.
+</span><span style="color:#75715e"></span>        document.<span style="color:#a6e22e">body</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">responseXML</span>.<span style="color:#a6e22e">body</span>
+        window.<span style="color:#a6e22e">scrollTo</span>(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>)
+    }
+
+    <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">onerror</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">onabort</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">ontimeout</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>() {
+        <span style="color:#75715e">// Ensure a normal page transition.
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">history</span>.<span style="color:#a6e22e">pushState</span>(<span style="color:#66d9ef">null</span>, <span style="color:#e6db74">&#39;&#39;</span>, <span style="color:#a6e22e">anchor</span>.<span style="color:#a6e22e">href</span>)
+        <span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">reload</span>()
+    }
+
+    <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">open</span>(<span style="color:#e6db74">&#39;GET&#39;</span>, <span style="color:#a6e22e">anchor</span>.<span style="color:#a6e22e">href</span>)
+    <span style="color:#75715e">// This will automatically parse the response as XML on the fly.
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">responseType</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;document&#39;</span>
+    <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">send</span>(<span style="color:#66d9ef">null</span>)
+})
+</pre>
+<p>I have fashioned this into a simple, fully automatic <a href="https://github.com/mitranim/simple-pjax" target="_blank" rel="noopener noreferrer">library<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>. Just drop it into your site and enjoy the benefits. Feedback and contributions are welcome! If you happen to find a better implementation, I&rsquo;d be happy to hear about it.</p>
+<h2 id="benefits"><span class="heading-prefix" aria-hidden="true"></span>Benefits<a href="#benefits" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Despite the simplicity, the benefits are stunning. This gives your multi-page website most of the advantages enjoyed by SPA. The browser gets to keep the same JavaScript runtime and all downloaded assets, including images, fonts, stylesheets, etc. This dramatically improves page load times, particularly on poor connections such as mobile networks. This also lets you maintain a persistent websocket connection while the user navigates your server-rendered multi-page app!</p>
+
+<p>Also, I can&rsquo;t overstate how wasteful it is to execute all scripts on each new page load, which is typical for most websites. I just checked <a href="https://wired.com" target="_blank" rel="noopener noreferrer">Wired<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> and the total execution time of all scripts was <strong>480 ms</strong> <em>before</em> ads kicked in. Each new page reruns all scripts. Using pjax, you can eliminate this waste, keeping your website more responsive and saving the visitors&rsquo; CPU cycles and battery life.</p>
+<h2 id="gotchas"><span class="heading-prefix" aria-hidden="true"></span>Gotchas<a href="#gotchas" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>You need to watch out for code that modifies the DOM on page load. Most websites have this in the form of analytics and UI widgets. When transitioning to a new page, that code must be re-executed to modify the new document body.</p>
+
+<p>Before a transition, you&rsquo;ll need to perform teardown like unmounting React components or destroying jQuery plugins. Do that in a document-level <code>simple-pjax-before-transition</code> event listener.</p>
+
+<p>After a transition, you&rsquo;ll need to run the same setup as on the first page load. Do that in a document-level <code>simple-pjax-after-transition</code> event listener.</p>
+
+<p><code>simple-pjax</code> also reruns any inline scripts found in the new document body, which makes it compatible out-of-the-box with common analytics snippets.</p>
+
+<p>You&rsquo;ll also need to take special care of widget libraries with a fragile DOM lifecycle, like Angular or Polymer. They break when document body is replaced. Notably, React is perfectly compatible; just make sure to unmount all components before replacing the body.</p>
+<h2 id="prior-art"><span class="heading-prefix" aria-hidden="true"></span>Prior Art<a href="#prior-art" class="heading-anchor" aria-hidden="true"></a></h2>
+<p>Pjax has been around for a few years. There are a few implementations floating around, like the eponymous jQuery <a href="https://github.com/defunkt/jquery-pjax" target="_blank" rel="noopener noreferrer">plugin<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>. Pjax is baked into Ruby on Rails and YUI. Many sites use it in one form or another.</p>
+
+<p>Why isn&rsquo;t pjax more popular? Maybe because people overengineer it. The libraries I&rsquo;ve seen tend to focus on downloading partials (HTML snippets). They require you to micromanage the markup, and some need a special server configuration. I think these people have missed the point. The biggest benefit is keeping the browsing session alive, and this can be achieved with zero configuration or thought. For most sites, this is enough, and additional effort is usually not worth it. Is this wrong? You tell me!</p>
+
+<p>Let&rsquo;s use this technique to improve the web!</p>
+
+  </article>
+
+  <hr style="margin-top: auto" />
+
+  <div class="gaps-v-1">
+    <p>
+      This blog currently doesn't support comments.
+      Feel free to <a href="https://twitter.com/mitranim" target="_blank" rel="noopener noreferrer" class="decorate-link">tweet<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a> at me,
+      email to <a href="mailto:me@mitranim.com?subject=Re:%20Cheating%20for%20Performance%20with%20Pjax">me@mitranim.com</a>,
+      or use the <a href="/#contacts">other contacts</a>.
+    </p>
+    <p class="inline-flex row-start-start gaps-h-0x5">
+  <span>Subscribe using one of:</span>
+  <a href="/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Atom<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="/feed_rss.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">RSS<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+  <a href="https://feedly.com/i/subscription/feed/https://mitranim.com/feed.xml" target="_blank" rel="noopener noreferrer" class="decorate-link">Feedly<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+</p>
+
+  </div>
+</div>
+</div>
+<footer style="margin-top: auto">
+  <div class="limit-width flex row-between-center margin-t-4 margin-b-2">
+    <span class="flex-1 flex row-start-start gaps-h-0x5">
+      <span class="text-left">2014—2020</span>
+      <a href="https://github.com/mitranim/mitranim.github.io" target="_blank" rel="noopener noreferrer" class="decorate-link">website source<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; width: 1.5ex; height: 1.5ex; margin-left: 0.3ch;" aria-hidden="true">
+	<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+	<polyline points="15 3 21 3 21 9" />
+	<line x1="10" y1="14" x2="21" y2="3" />
+</svg></a>
+    </span>
+
+    <span class="flex-1 text-center">
+      <a href="/#contacts" class="decorate-link">touch me</a>
+    </span>
+
+    <span class="flex-1 flex row-end-center gaps-h-0x5">
+      <a href="#top" class="fill-gray-fg-close padding-1 busy-bg-gray-close" onclick="event.preventDefault(); window.scrollTo(0, 0)" aria-label="scroll up">
+        <svg class="svg-icon fill-fg" viewBox="0 0 448 512" width="1em" height="1em"><path d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"/></svg>
+      </a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
+
+
